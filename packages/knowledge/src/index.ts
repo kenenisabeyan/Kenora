@@ -1,4 +1,4 @@
-import { KnowledgeItemDTO } from '@kenora/types';
+import { KnowledgeItemDTO } from "@kenora/types";
 
 /**
  * Knowledge Pipeline Interfaces (Ingestion -> Normalization -> Deduplication -> Extraction -> Verification -> Graph)
@@ -31,7 +31,10 @@ export interface ExtractedEntity {
 
 export interface KnowledgePipelineProcessor {
   normalize(rawItem: unknown, adapterType: string): Promise<NormalizedItem>;
-  deduplicate(item: NormalizedItem, tenantId: string): Promise<{ isDuplicate: boolean; existingId?: string }>;
+  deduplicate(
+    item: NormalizedItem,
+    tenantId: string,
+  ): Promise<{ isDuplicate: boolean; existingId?: string }>;
   extractClaims(item: NormalizedItem): Promise<ExtractedClaim[]>;
   extractEntities(item: NormalizedItem): Promise<ExtractedEntity[]>;
 }

@@ -1,9 +1,10 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'Kenora - Professional Knowledge & Intelligence Platform',
-  description: 'AI-powered professional intelligence infrastructure connecting fragmented knowledge ecosystems.',
+  title: "Kenora - Professional Knowledge & Intelligence Platform",
+  description:
+    "AI-powered professional intelligence infrastructure connecting fragmented knowledge ecosystems.",
 };
 
 export default function RootLayout({

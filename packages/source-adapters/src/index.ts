@@ -1,10 +1,10 @@
-export * from './core/source-adapter.js';
-export * from './github/index.js';
-export * from './generic/index.js';
+export * from "./core/source-adapter.js";
+export * from "./github/index.js";
+export * from "./generic/index.js";
 
-import { ISourceAdapter } from './core/source-adapter.js';
-import { GitHubSourceAdapter } from './github/index.js';
-import { GenericWebAdapter } from './generic/index.js';
+import { ISourceAdapter } from "./core/source-adapter.js";
+import { GitHubSourceAdapter } from "./github/index.js";
+import { GenericWebAdapter } from "./generic/index.js";
 
 export class SourceAdapterRegistry {
   private adapters = new Map<string, ISourceAdapter>();

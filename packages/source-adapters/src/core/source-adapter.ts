@@ -1,4 +1,4 @@
-import { KnowledgeItemDTO } from '@kenora/types';
+import { KnowledgeItemDTO } from "@kenora/types";
 
 export interface SourceCapabilities {
   supportsRealtime: boolean;
@@ -8,7 +8,7 @@ export interface SourceCapabilities {
 }
 
 export interface SourceHealth {
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: "healthy" | "degraded" | "unhealthy";
   lastCheckedAt: string;
   errorMessage?: string;
 }

@@ -4,7 +4,7 @@
 
 export interface VerificationResult {
   itemId: string;
-  status: 'verified' | 'refuted' | 'inconclusive' | 'unverified';
+  status: "verified" | "refuted" | "inconclusive" | "unverified";
   confidenceScore: number;
   corroboratingSources: string[];
   contradictingSources: string[];
@@ -14,5 +14,7 @@ export interface VerificationResult {
 
 export interface IVerificationEngine {
   verifyItem(itemId: string, tenantId: string): Promise<VerificationResult>;
-  assessSourceTrust(sourceId: string): Promise<{ trustScore: number; historicalAccuracy: number }>;
+  assessSourceTrust(
+    sourceId: string,
+  ): Promise<{ trustScore: number; historicalAccuracy: number }>;
 }

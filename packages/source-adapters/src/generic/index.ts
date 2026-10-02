@@ -1,7 +1,12 @@
-import { ISourceAdapter, SourceCapabilities, SourceHealth, SourceItem } from '../core/source-adapter.js';
+import {
+  ISourceAdapter,
+  SourceCapabilities,
+  SourceHealth,
+  SourceItem,
+} from "../core/source-adapter.js";
 
 export class GenericWebAdapter implements ISourceAdapter {
-  readonly adapterType = 'generic';
+  readonly adapterType = "generic";
 
   getCapabilities(): SourceCapabilities {
     return {
@@ -13,7 +18,7 @@ export class GenericWebAdapter implements ISourceAdapter {
   }
 
   async checkHealth(): Promise<SourceHealth> {
-    return { status: 'healthy', lastCheckedAt: new Date().toISOString() };
+    return { status: "healthy", lastCheckedAt: new Date().toISOString() };
   }
 
   async fetchLatest(sourceUrl: string, since?: Date): Promise<SourceItem[]> {

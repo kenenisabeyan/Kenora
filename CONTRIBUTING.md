@@ -25,6 +25,7 @@ Thank you for contributing to Kenora.
    ```
 
 ## Engineering Rules
+
 - Maintain strict modular boundaries (`apps/*` vs `packages/*`).
 - Do not import database or framework code into `@kenora/domain`.
 - Always sanitize external input using `@kenora/security`.

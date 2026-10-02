@@ -13,13 +13,15 @@ export class TenantContext {
   private static activeTenantId: string | null = null;
 
   static set(tenantId: string) {
-    if (!tenantId) throw new Error('Tenant ID cannot be null');
+    if (!tenantId) throw new Error("Tenant ID cannot be null");
     this.activeTenantId = tenantId;
   }
 
   static get(): string {
     if (!this.activeTenantId) {
-      throw new Error('TenantContext error: No active tenant bound to execution context');
+      throw new Error(
+        "TenantContext error: No active tenant bound to execution context",
+      );
     }
     return this.activeTenantId;
   }
@@ -35,11 +37,11 @@ export class TenantContext {
  */
 export class ExternalDataSanitizer {
   static sanitizeText(input: string): string {
-    if (!input) return '';
+    if (!input) return "";
     // Strip executive prompt override patterns, system prompt injections, script tags, null bytes
     return input
-      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
       .trim();
   }
 

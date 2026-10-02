@@ -3,7 +3,7 @@
  */
 
 export interface LLMMessage {
-  role: 'system' | 'user' | 'assistant';
+  role: "system" | "user" | "assistant";
   content: string;
 }
 
@@ -25,7 +25,10 @@ export interface LLMCompletionResult {
 
 export interface ILLMProvider {
   readonly providerName: string;
-  complete(messages: LLMMessage[], options?: LLMCompletionOptions): Promise<LLMCompletionResult>;
+  complete(
+    messages: LLMMessage[],
+    options?: LLMCompletionOptions,
+  ): Promise<LLMCompletionResult>;
 }
 
 export interface IEmbeddingProvider {

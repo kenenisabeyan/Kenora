@@ -45,28 +45,35 @@ kenora/
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js `>= 20.0.0`
 - pnpm `>= 9.0.0`
 - Docker & Docker Compose (for PostgreSQL + pgvector, Redis, NATS)
 
 ### 1. Installation
+
 ```bash
 pnpm install
 ```
 
 ### 2. Infrastructure Setup
+
 Spin up local PostgreSQL (with `pgvector`), Redis, NATS JetStream, and MinIO:
+
 ```bash
 docker-compose up -d
 ```
 
 ### 3. Database Migrations
+
 ```bash
 pnpm db:push
 ```
 
 ### 4. Running Development Servers
+
 Start all applications in parallel mode:
+
 ```bash
 pnpm dev
 ```

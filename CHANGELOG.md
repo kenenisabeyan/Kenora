@@ -3,7 +3,9 @@
 All notable changes to the Kenora project will be documented in this file.
 
 ## [0.1.0] - 2026-10-02
+
 ### Added
+
 - **Monorepo Foundation (Task 001)**: pnpm workspace, Turborepo, TypeScript base config.
 - **Web App (`apps/web`)**: Next.js 15 application shell with layout, environment status probe, error boundary, and loading state.
 - **API App (`apps/api`)**: NestJS backend with modular structure, health module (`GET /health`), validation pipe, and Pino logger.

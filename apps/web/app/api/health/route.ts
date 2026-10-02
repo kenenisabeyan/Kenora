@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export async function GET() {
   return NextResponse.json({
-    status: 'ok',
-    app: 'kenora-web',
+    status: "ok",
+    app: "kenora-web",
     timestamp: new Date().toISOString(),
-    version: '0.1.0',
+    version: "0.1.0",
   });
 }

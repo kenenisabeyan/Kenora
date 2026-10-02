@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export default function HomeFoundationPage() {
   return (
@@ -10,8 +10,12 @@ export default function HomeFoundationPage() {
             K
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-white">KENORA</h1>
-            <p className="text-xs text-indigo-400 font-medium">AI-Powered Professional Intelligence Infrastructure</p>
+            <h1 className="text-xl font-bold tracking-tight text-white">
+              KENORA
+            </h1>
+            <p className="text-xs text-indigo-400 font-medium">
+              AI-Powered Professional Intelligence Infrastructure
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -25,30 +29,47 @@ export default function HomeFoundationPage() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto w-full space-y-6">
         <div className="p-6 bg-slate-900 border border-slate-800 rounded-xl shadow-lg">
-          <h2 className="text-lg font-semibold text-white mb-2">Kenora Foundation Shell (Task 001)</h2>
+          <h2 className="text-lg font-semibold text-white mb-2">
+            Kenora Foundation Shell (Task 001)
+          </h2>
           <p className="text-sm text-slate-300 leading-relaxed">
-            This application shell serves as the foundational user interface for Kenora. The core architecture is source-agnostic, multi-tenant ready, and decoupled across 16 core packages and 3 application runtimes.
+            This application shell serves as the foundational user interface for
+            Kenora. The core architecture is source-agnostic, multi-tenant
+            ready, and decoupled across 16 core packages and 3 application
+            runtimes.
           </p>
         </div>
 
         {/* Runtime Status */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-5 bg-slate-900 border border-slate-800 rounded-xl">
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Web Application</div>
+            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+              Web Application
+            </div>
             <div className="text-lg font-bold text-white">apps/web</div>
-            <div className="text-xs text-emerald-400 mt-2 font-mono">Next.js App Router</div>
+            <div className="text-xs text-emerald-400 mt-2 font-mono">
+              Next.js App Router
+            </div>
           </div>
 
           <div className="p-5 bg-slate-900 border border-slate-800 rounded-xl">
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Platform API</div>
+            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+              Platform API
+            </div>
             <div className="text-lg font-bold text-white">apps/api</div>
-            <div className="text-xs text-indigo-400 mt-2 font-mono">NestJS / GET /health</div>
+            <div className="text-xs text-indigo-400 mt-2 font-mono">
+              NestJS / GET /health
+            </div>
           </div>
 
           <div className="p-5 bg-slate-900 border border-slate-800 rounded-xl">
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Worker Daemon</div>
+            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+              Worker Daemon
+            </div>
             <div className="text-lg font-bold text-white">apps/workers</div>
-            <div className="text-xs text-amber-400 mt-2 font-mono">Node.js / BullMQ</div>
+            <div className="text-xs text-amber-400 mt-2 font-mono">
+              Node.js / BullMQ
+            </div>
           </div>
         </div>
 
@@ -59,22 +80,28 @@ export default function HomeFoundationPage() {
           </h3>
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-300">
             <li className="flex items-center gap-2">
-              <span className="text-emerald-400 font-bold">✓</span> PostgreSQL + pgvector (Drizzle ORM)
+              <span className="text-emerald-400 font-bold">✓</span> PostgreSQL +
+              pgvector (Drizzle ORM)
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-emerald-400 font-bold">✓</span> Redis Cache & Queue Infrastructure
+              <span className="text-emerald-400 font-bold">✓</span> Redis Cache
+              & Queue Infrastructure
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-emerald-400 font-bold">✓</span> NATS JetStream Event Backbone
+              <span className="text-emerald-400 font-bold">✓</span> NATS
+              JetStream Event Backbone
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-emerald-400 font-bold">✓</span> Source-Agnostic Adapter Contract
+              <span className="text-emerald-400 font-bold">✓</span>{" "}
+              Source-Agnostic Adapter Contract
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-emerald-400 font-bold">✓</span> Provider-Agnostic AI Gateway Interface
+              <span className="text-emerald-400 font-bold">✓</span>{" "}
+              Provider-Agnostic AI Gateway Interface
             </li>
             <li className="flex items-center gap-2">
-              <span className="text-emerald-400 font-bold">✓</span> Tenant Isolation & Untrusted Data Boundary
+              <span className="text-emerald-400 font-bold">✓</span> Tenant
+              Isolation & Untrusted Data Boundary
             </li>
           </ul>
         </div>

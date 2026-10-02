@@ -7,7 +7,7 @@ export interface MemoryRecord {
   tenantId: string;
   agentId?: string;
   userId?: string;
-  type: 'short_term' | 'long_term' | 'episodic';
+  type: "short_term" | "long_term" | "episodic";
   key: string;
   value: unknown;
   ttlSeconds?: number;
@@ -16,6 +16,6 @@ export interface MemoryRecord {
 
 export interface IMemoryStore {
   get(tenantId: string, key: string): Promise<MemoryRecord | null>;
-  set(record: Omit<MemoryRecord, 'id' | 'createdAt'>): Promise<MemoryRecord>;
+  set(record: Omit<MemoryRecord, "id" | "createdAt">): Promise<MemoryRecord>;
   delete(tenantId: string, key: string): Promise<void>;
 }

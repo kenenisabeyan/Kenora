@@ -6,7 +6,7 @@ export interface PaginationParams {
   page: number;
   limit: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 export interface PaginatedResult<T> {
@@ -43,12 +43,13 @@ export interface KnowledgeItemDTO {
   externalId?: string;
   title: string;
   content: string;
-  contentType: 'article' | 'paper' | 'code' | 'video' | 'discussion' | 'advisory';
+  contentType:
+    "article" | "paper" | "code" | "video" | "discussion" | "advisory";
   url: string;
   author?: string;
   publishedAt?: string;
   confidenceScore: number;
-  verificationStatus: 'unverified' | 'verified' | 'refuted' | 'inconclusive';
+  verificationStatus: "unverified" | "verified" | "refuted" | "inconclusive";
   tags: string[];
   metadata: Record<string, unknown>;
   createdAt: string;
@@ -61,7 +62,7 @@ export interface SourceDTO {
   name: string;
   adapterType: string;
   url: string;
-  status: 'active' | 'paused' | 'error' | 'deprecated';
+  status: "active" | "paused" | "error" | "deprecated";
   pollingIntervalSeconds: number;
   lastPolledAt?: string;
   metadata: Record<string, unknown>;
@@ -77,7 +78,7 @@ export interface BriefingDTO {
   summary: string;
   items: KnowledgeItemDTO[];
   generatedAt: string;
-  readStatus: 'unread' | 'read' | 'archived';
+  readStatus: "unread" | "read" | "archived";
   metadata: Record<string, unknown>;
 }
 
@@ -86,19 +87,19 @@ export interface AgentDTO {
   tenantId: string;
   name: string;
   type: string;
-  status: 'idle' | 'running' | 'paused' | 'failed';
+  status: "idle" | "running" | "paused" | "failed";
   capabilities: string[];
   lastActiveAt?: string;
   metadata: Record<string, unknown>;
 }
 
 export interface HealthCheckStatus {
-  status: 'ok' | 'degraded' | 'error';
+  status: "ok" | "degraded" | "error";
   version: string;
   timestamp: string;
   services: {
-    database: { status: 'ok' | 'error'; latencyMs?: number };
-    redis: { status: 'ok' | 'error'; latencyMs?: number };
-    nats: { status: 'ok' | 'error'; latencyMs?: number };
+    database: { status: "ok" | "error"; latencyMs?: number };
+    redis: { status: "ok" | "error"; latencyMs?: number };
+    nats: { status: "ok" | "error"; latencyMs?: number };
   };
 }

@@ -1,4 +1,4 @@
-import pino, { LoggerOptions } from 'pino';
+import pino, { LoggerOptions } from "pino";
 
 export interface LoggerConfig {
   serviceName: string;
@@ -6,21 +6,21 @@ export interface LoggerConfig {
 }
 
 export function createLogger(config: LoggerConfig) {
-  const isDev = process.env.NODE_ENV !== 'production';
+  const isDev = process.env.NODE_ENV !== "production";
   const options: LoggerOptions = {
     name: config.serviceName,
-    level: config.level || process.env.LOG_LEVEL || 'info',
+    level: config.level || process.env.LOG_LEVEL || "info",
     timestamp: pino.stdTimeFunctions.isoTime,
     formatters: {
       level: (label) => ({ level: label }),
     },
     transport: isDev
       ? {
-          target: 'pino-pretty',
+          target: "pino-pretty",
           options: {
             colorize: true,
-            translateTime: 'SYS:standard',
-            ignore: 'pid,hostname',
+            translateTime: "SYS:standard",
+            ignore: "pid,hostname",
           },
         }
       : undefined,

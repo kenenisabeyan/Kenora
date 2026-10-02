@@ -1,4 +1,4 @@
-import { KnowledgeItemDTO, SourceDTO, BriefingDTO } from '@kenora/types';
+import { KnowledgeItemDTO, SourceDTO, BriefingDTO } from "@kenora/types";
 
 /**
  * Domain Models & Domain Contracts for Kenora
@@ -8,7 +8,7 @@ import { KnowledgeItemDTO, SourceDTO, BriefingDTO } from '@kenora/types';
 export class TenantId {
   constructor(public readonly value: string) {
     if (!value || value.trim().length === 0) {
-      throw new Error('TenantId cannot be empty');
+      throw new Error("TenantId cannot be empty");
     }
   }
 }
@@ -22,9 +22,16 @@ export class SourceId {
 }
 
 export interface IKnowledgeItemRepository {
-  findById(id: KnowledgeItemId, tenantId: TenantId): Promise<KnowledgeItemDTO | null>;
+  findById(
+    id: KnowledgeItemId,
+    tenantId: TenantId,
+  ): Promise<KnowledgeItemDTO | null>;
   save(item: KnowledgeItemDTO): Promise<KnowledgeItemDTO>;
-  listByTenant(tenantId: TenantId, limit: number, offset: number): Promise<KnowledgeItemDTO[]>;
+  listByTenant(
+    tenantId: TenantId,
+    limit: number,
+    offset: number,
+  ): Promise<KnowledgeItemDTO[]>;
 }
 
 export interface ISourceRepository {
