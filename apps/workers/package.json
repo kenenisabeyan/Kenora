@@ -14,6 +14,7 @@
     "@kenora/domain": "workspace:*",
     "@kenora/events": "workspace:*",
     "@kenora/observability": "workspace:*",
+    "@kenora/security": "workspace:*",
     "@kenora/source-adapters": "workspace:*",
     "@kenora/types": "workspace:*",
     "bullmq": "^5.34.4",

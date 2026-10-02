@@ -1,21 +1,28 @@
 import { describe, it, expect } from "vitest";
-import { envSchema } from "./index.js";
+import { loadEnv } from "./index.js";
 
 describe("Environment Configuration Validation", () => {
-  it("should parse valid environment variables with defaults", () => {
-    const parsed = envSchema.parse({
-      NODE_ENV: "development",
-      PORT: "4000",
-    });
-    expect(parsed.NODE_ENV).toBe("development");
-    expect(parsed.PORT).toBe(4000);
-    expect(parsed.DATABASE_URL).toBeDefined();
+  it("should parse valid development environment with defaults", () => {
+    const env = loadEnv({ NODE_ENV: "development" });
+    expect(env.NODE_ENV).toBe("development");
+    expect(env.PORT).toBe(4000);
+    expect(env.DATABASE_URL).toBeDefined();
   });
 
-  it("should reject invalid NODE_ENV", () => {
-    const result = envSchema.safeParse({
-      NODE_ENV: "invalid-env",
+  it("should reject default JWT_SECRET in production mode", () => {
+    expect(() =>
+      loadEnv({
+        NODE_ENV: "production",
+        JWT_SECRET: "super-secret-kenora-jwt-token-key-change-in-production",
+      }),
+    ).toThrow("Environment configuration validation failed");
+  });
+
+  it("should accept custom JWT_SECRET in production mode", () => {
+    const env = loadEnv({
+      NODE_ENV: "production",
+      JWT_SECRET: "a-genuine-custom-production-jwt-secret-key-32-chars-long",
     });
-    expect(result.success).toBe(false);
+    expect(env.NODE_ENV).toBe("production");
   });
 });

@@ -11,9 +11,11 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@kenora/types": "workspace:*"
+    "@kenora/types": "workspace:*",
+    "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   }

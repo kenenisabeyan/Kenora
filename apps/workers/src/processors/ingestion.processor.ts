@@ -1,38 +1,65 @@
 import { SourceAdapterRegistry } from "@kenora/source-adapters";
 import { createLogger } from "@kenora/observability";
-import { env } from "@kenora/config";
+import { TenantContext } from "@kenora/security";
 
 const logger = createLogger({ serviceName: "kenora-workers" });
+
+export interface IngestionJobPayload {
+  organizationId: string;
+  sourceId: string;
+  adapterType: string;
+  url: string;
+  correlationId?: string;
+}
 
 export class IngestionProcessor {
   private registry = new SourceAdapterRegistry();
 
-  async processSourcePolling(
-    sourceId: string,
-    adapterType: string,
-    url: string,
-  ) {
-    logger.info(
-      { sourceId, adapterType, url },
-      "Executing idempotent background source ingestion job",
-    );
-
-    const adapter = this.registry.get(adapterType);
-    if (!adapter) {
-      logger.warn(
-        { adapterType },
-        "Adapter type not registered, falling back to generic adapter",
+  async processSourcePolling(jobData: IngestionJobPayload) {
+    if (!jobData.organizationId) {
+      throw new Error(
+        "WORKER_ERROR: Job payload missing required organizationId",
       );
-      return;
     }
 
-    const health = await adapter.checkHealth();
-    logger.info({ adapterType, health }, "Adapter health verified");
+    // Re-establish trusted execution context for background job via AsyncLocalStorage
+    return TenantContext.run(
+      {
+        tenantId: jobData.organizationId,
+        correlationId: jobData.correlationId || `job-${Date.now()}`,
+      },
+      async () => {
+        const activeTenant = TenantContext.get();
+        logger.info(
+          {
+            activeTenant,
+            sourceId: jobData.sourceId,
+            adapterType: jobData.adapterType,
+          },
+          "Executing background source ingestion job in tenant context",
+        );
 
-    const items = await adapter.fetchLatest(url);
-    logger.info(
-      { sourceId, itemCount: items.length },
-      "Source poll cycle completed",
+        const adapter = this.registry.get(jobData.adapterType);
+        if (!adapter) {
+          logger.warn(
+            { adapterType: jobData.adapterType },
+            "Adapter type not registered, falling back to generic",
+          );
+          return;
+        }
+
+        const health = await adapter.checkHealth();
+        logger.info(
+          { adapterType: jobData.adapterType, health },
+          "Adapter health verified in tenant scope",
+        );
+
+        const items = await adapter.fetchLatest(jobData.url);
+        logger.info(
+          { activeTenant, itemCount: items.length },
+          "Source poll cycle completed safely in tenant context",
+        );
+      },
     );
   }
 }

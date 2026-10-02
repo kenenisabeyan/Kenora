@@ -10,14 +10,15 @@ async function startWorkerDaemon() {
 
   const ingestionProcessor = new IngestionProcessor();
 
-  // Run periodic poll cycle simulation for phase 0 sanity
+  // Run periodic poll cycle simulation for phase 1 sanity check
   setInterval(async () => {
     try {
-      await ingestionProcessor.processSourcePolling(
-        "src-1",
-        "generic",
-        "https://docs.kenora.ai/advisories",
-      );
+      await ingestionProcessor.processSourcePolling({
+        organizationId: "org-default-system",
+        sourceId: "src-1",
+        adapterType: "generic",
+        url: "https://docs.kenora.ai/advisories",
+      });
     } catch (err) {
       logger.error(err, "Error in worker background cycle");
     }

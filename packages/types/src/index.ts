@@ -36,6 +36,43 @@ export interface APIResponse<T> {
   };
 }
 
+export interface UserDTO {
+  id: string;
+  email: string;
+  name: string;
+  isEmailVerified: boolean;
+  status: "active" | "suspended";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrganizationDTO {
+  id: string;
+  name: string;
+  slug: string;
+  status: "active" | "suspended";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MembershipDTO {
+  id: string;
+  userId: string;
+  organizationId: string;
+  role: "OWNER" | "ADMIN" | "MEMBER";
+  status: "active" | "invited";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuthSessionDTO {
+  sessionId: string;
+  user: UserDTO;
+  activeOrganization?: OrganizationDTO;
+  memberships: MembershipDTO[];
+  expiresAt: string;
+}
+
 export interface KnowledgeItemDTO {
   id: string;
   tenantId: string;
