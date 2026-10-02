@@ -10,6 +10,9 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "type-check": "turbo run type-check",
+    "typecheck": "turbo run type-check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "clean": "turbo run clean && rimraf node_modules",
     "db:generate": "pnpm --filter @kenora/database db:generate",
     "db:migrate": "pnpm --filter @kenora/database db:migrate",
@@ -21,7 +24,8 @@
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
     "turbo": "^2.3.3",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   },
   "engines": {
     "node": ">=20.0.0",
