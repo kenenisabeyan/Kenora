@@ -1,0 +1,27 @@
+{
+  "name": "@kenora/workers",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kenora/config": "workspace:*",
+    "@kenora/database": "workspace:*",
+    "@kenora/domain": "workspace:*",
+    "@kenora/events": "workspace:*",
+    "@kenora/observability": "workspace:*",
+    "@kenora/source-adapters": "workspace:*",
+    "@kenora/types": "workspace:*",
+    "bullmq": "^5.34.4",
+    "ioredis": "^5.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
