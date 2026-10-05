@@ -5,7 +5,6 @@ import {
   Body,
   Headers,
   UnauthorizedException,
-  Res,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
 import { AuthService } from "./auth.service.js";
@@ -16,6 +15,7 @@ import {
   ForgotPasswordInput,
   ResetPasswordInput,
   SwitchOrgInput,
+  ChangePasswordInput,
 } from "@kenora/api-contracts";
 
 @ApiTags("Authentication")
@@ -92,6 +92,23 @@ export class AuthController {
       token,
       input.organizationId,
     );
+    return {
+      success: true,
+      data,
+      meta: { timestamp: new Date().toISOString(), version: "v1" },
+    };
+  }
+
+  @Post("change-password")
+  @ApiOperation({
+    summary: "Change password for authenticated user and revoke other sessions",
+  })
+  async changePassword(
+    @Headers("authorization") authHeader: string | undefined,
+    @Body() input: ChangePasswordInput,
+  ): Promise<APIResponse<{ message: string }>> {
+    const token = this.extractToken(authHeader);
+    const data = await this.authService.changePassword(token, input);
     return {
       success: true,
       data,

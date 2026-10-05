@@ -13,14 +13,10 @@ export interface ITenantStore {
 
 /**
  * Request-Scoped & Job-Scoped Tenant Context Store using AsyncLocalStorage
- * Prevents cross-request static memory pollution in concurrent async Node.js loops.
  */
 const tenantStorage = new AsyncLocalStorage<ITenantStore>();
 
 export class TenantContext {
-  /**
-   * Run a callback scoped within a specific tenant context
-   */
   static run<T>(store: ITenantStore, callback: () => T): T {
     if (!store.tenantId || store.tenantId.trim() === "") {
       throw new Error("TenantContext error: Invalid or empty tenantId");
@@ -28,9 +24,6 @@ export class TenantContext {
     return tenantStorage.run(store, callback);
   }
 
-  /**
-   * Get the current request or worker job's tenant ID
-   */
   static get(): string {
     const store = tenantStorage.getStore();
     if (!store || !store.tenantId) {
@@ -41,9 +34,6 @@ export class TenantContext {
     return store.tenantId;
   }
 
-  /**
-   * Get full execution context store (tenant, user, correlation ID)
-   */
   static getStore(): ITenantStore | undefined {
     return tenantStorage.getStore();
   }
@@ -79,9 +69,6 @@ export const Permissions = {
 
 export type Permission = (typeof Permissions)[keyof typeof Permissions];
 
-/**
- * RBAC Permission Matrix
- */
 const RolePermissionMatrix: Record<Role, Permission[]> = {
   OWNER: Object.values(Permissions),
   ADMIN: [
@@ -119,14 +106,7 @@ export interface ResourceRef {
   resourceId?: string;
 }
 
-/**
- * Centralized Authorization Service
- * Server-side authorization check enforcing: authenticated && member_of_org && has_permission && resource_belongs_to_org
- */
 export class AuthorizationService {
-  /**
-   * Authorizes whether an actor in a given organization has permission to act on a target resource
-   */
   static can(
     role: Role,
     requiredPermission: Permission,
@@ -136,19 +116,13 @@ export class AuthorizationService {
     if (!activeOrgId || !resource.organizationId) {
       return false;
     }
-
-    // Strict Tenant / Organization Isolation Boundary Check
     if (activeOrgId !== resource.organizationId) {
       return false;
     }
-
     const grantedPermissions = RolePermissionMatrix[role] || [];
     return grantedPermissions.includes(requiredPermission);
   }
 
-  /**
-   * Throws forbidden exception if authorization fails
-   */
   static authorize(
     role: Role,
     requiredPermission: Permission,
@@ -163,9 +137,6 @@ export class AuthorizationService {
   }
 }
 
-/**
- * Production Password Hashing Utility using bcrypt
- */
 export class PasswordHasher {
   private static readonly SALT_ROUNDS = 12;
 
@@ -183,9 +154,43 @@ export class PasswordHasher {
 }
 
 /**
- * Untrusted Data Boundary Sanitizer
- * Note: Handles text markup/control character cleanup. Prompt injection defense requires instruction/data separation boundaries.
+ * Production Email Service Abstraction
  */
+export interface SendEmailPayload {
+  to: string;
+  subject: string;
+  template: "email_verification" | "password_reset" | "security_alert";
+  variables: Record<string, string>;
+}
+
+export interface IEmailService {
+  sendEmail(
+    payload: SendEmailPayload,
+  ): Promise<{ success: boolean; messageId: string }>;
+}
+
+/**
+ * Development-Only Log Email Service Provider
+ * Clearly marked: Development logging behavior only. Production requires SendGrid/SES provider.
+ */
+export class DevelopmentEmailService implements IEmailService {
+  async sendEmail(
+    payload: SendEmailPayload,
+  ): Promise<{ success: boolean; messageId: string }> {
+    const messageId = `dev-msg-${Date.now()}`;
+    // Development environment trace logging without exposing raw secret tokens
+    if (
+      process.env.NODE_ENV === "development" ||
+      process.env.NODE_ENV === "test"
+    ) {
+      console.log(
+        `[DEV EMAIL SERVICE PROVIDER] To: ${payload.to} | Subject: ${payload.subject} | MessageID: ${messageId}`,
+      );
+    }
+    return { success: true, messageId };
+  }
+}
+
 export class ExternalDataSanitizer {
   static sanitizeText(input: string): string {
     if (!input) return "";

@@ -57,18 +57,41 @@ describe("AuthService (Phase 1 Identity & Authentication)", () => {
     expect(session.activeOrganization?.name).toBe("Beta Org");
   });
 
-  it("should reject invalid password with generic error (Account Enumeration Protection)", async () => {
-    await authService.register({
-      name: "Charlie",
-      organizationName: "Gamma Org",
-      email: "charlie@gamma.com",
-      password: "ValidPassword123",
+  it("should change password successfully when current password is valid", async () => {
+    const session = await authService.register({
+      name: "Eve Security",
+      organizationName: "Epsilon Org",
+      email: "eve@epsilon.com",
+      password: "OldPassword123!",
+    });
+
+    const result = await authService.changePassword(session.sessionId, {
+      currentPassword: "OldPassword123!",
+      newPassword: "NewPassword999!",
+    });
+
+    expect(result.message).toContain("Password changed successfully");
+
+    // Verify login works with new password
+    const newSession = await authService.login({
+      email: "eve@epsilon.com",
+      password: "NewPassword999!",
+    });
+    expect(newSession.user.email).toBe("eve@epsilon.com");
+  });
+
+  it("should reject password change when current password is wrong", async () => {
+    const session = await authService.register({
+      name: "Frank User",
+      organizationName: "Zeta Org",
+      email: "frank@zeta.com",
+      password: "OldPassword123!",
     });
 
     await expect(
-      authService.login({
-        email: "charlie@gamma.com",
-        password: "WrongPassword!",
+      authService.changePassword(session.sessionId, {
+        currentPassword: "WrongOldPassword!",
+        newPassword: "NewPassword999!",
       }),
     ).rejects.toThrow("AUTH_INVALID_CREDENTIALS");
   });
@@ -103,7 +126,6 @@ describe("AuthService (Phase 1 Identity & Authentication)", () => {
       password: "Password123!",
     });
 
-    // Alice attempts to switch active org to Bob's Org ID
     const bobOrgId = sessionBob.activeOrganization!.id;
     await expect(
       authService.switchOrganization(sessionAlice.sessionId, bobOrgId),

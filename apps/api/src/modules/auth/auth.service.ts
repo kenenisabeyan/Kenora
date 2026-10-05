@@ -3,7 +3,11 @@ import {
   UnauthorizedException,
   BadRequestException,
 } from "@nestjs/common";
-import { PasswordHasher } from "@kenora/security";
+import {
+  PasswordHasher,
+  DevelopmentEmailService,
+  IEmailService,
+} from "@kenora/security";
 import {
   UserDTO,
   OrganizationDTO,
@@ -15,6 +19,7 @@ import {
   LoginInput,
   ForgotPasswordInput,
   ResetPasswordInput,
+  ChangePasswordInput,
 } from "@kenora/api-contracts";
 import crypto from "node:crypto";
 
@@ -60,6 +65,7 @@ interface StoredSession {
 
 @Injectable()
 export class AuthService {
+  private emailService: IEmailService = new DevelopmentEmailService();
   private users = new Map<string, StoredUser>();
   private organizations = new Map<string, StoredOrg>();
   private memberships: StoredMembership[] = [];
@@ -128,6 +134,21 @@ export class AuthService {
     };
     this.memberships.push(newMembership);
 
+    // Send Verification Email via EmailService Abstraction
+    const vToken = crypto.randomBytes(32).toString("hex");
+    this.verificationTokens.set(vToken, {
+      userId,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      used: false,
+    });
+
+    await this.emailService.sendEmail({
+      to: newUser.email,
+      subject: "Verify your Kenora Account",
+      template: "email_verification",
+      variables: { token: vToken },
+    });
+
     // Create Initial Session
     return this.createSession(newUser, orgId);
   }
@@ -154,7 +175,6 @@ export class AuthService {
       );
     }
 
-    // Default to primary organization membership
     const userMemberships = this.memberships.filter(
       (m) => m.userId === user.id && m.status === "active",
     );
@@ -267,7 +287,6 @@ export class AuthService {
   ): Promise<AuthSessionDTO> {
     const currentSession = await this.validateSession(sessionToken);
 
-    // Server-side Organization Membership Validation
     const isMember = currentSession.memberships.some(
       (m) => m.organizationId === targetOrgId,
     );
@@ -284,6 +303,39 @@ export class AuthService {
     return this.validateSession(sessionToken);
   }
 
+  async changePassword(
+    sessionToken: string,
+    input: ChangePasswordInput,
+  ): Promise<{ message: string }> {
+    const sessionDto = await this.validateSession(sessionToken);
+    const user = this.users.get(sessionDto.user.id)!;
+
+    const isValidCurrent = await PasswordHasher.compare(
+      input.currentPassword,
+      user.passwordHash,
+    );
+    if (!isValidCurrent) {
+      throw new UnauthorizedException(
+        "AUTH_INVALID_CREDENTIALS: Current password is incorrect",
+      );
+    }
+
+    user.passwordHash = await PasswordHasher.hash(input.newPassword);
+    user.updatedAt = new Date().toISOString();
+
+    // Revoke all other active sessions except current
+    for (const [t, s] of this.sessions.entries()) {
+      if (s.userId === user.id && t !== sessionToken) {
+        s.revokedAt = new Date().toISOString();
+      }
+    }
+
+    return {
+      message:
+        "Password changed successfully. All other active sessions have been revoked.",
+    };
+  }
+
   async forgotPassword(
     input: ForgotPasswordInput,
   ): Promise<{ message: string }> {
@@ -297,8 +349,14 @@ export class AuthService {
         expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
         used: false,
       });
+
+      await this.emailService.sendEmail({
+        to: user.email,
+        subject: "Reset your Kenora Password",
+        template: "password_reset",
+        variables: { token: resetToken },
+      });
     }
-    // Generic public response (Account Enumeration Protection)
     return {
       message:
         "If an account exists with this email, password reset instructions have been initiated.",
@@ -325,7 +383,6 @@ export class AuthService {
     user.passwordHash = await PasswordHasher.hash(input.newPassword);
     tokenRecord.used = true;
 
-    // Revoke all active sessions for security
     for (const [t, s] of this.sessions.entries()) {
       if (s.userId === user.id) {
         s.revokedAt = new Date().toISOString();
