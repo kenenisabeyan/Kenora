@@ -5,6 +5,8 @@ import {
   Body,
   Headers,
   UnauthorizedException,
+  HttpException,
+  HttpStatus,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
 import { AuthService } from "./auth.service.js";
@@ -16,7 +18,9 @@ import {
   ResetPasswordInput,
   SwitchOrgInput,
   ChangePasswordInput,
+  VerifyEmailInput,
 } from "@kenora/api-contracts";
+import { RateLimiter } from "@kenora/security";
 
 @ApiTags("Authentication")
 @Controller("auth")
@@ -28,6 +32,18 @@ export class AuthController {
   async register(
     @Body() input: RegisterInput,
   ): Promise<APIResponse<AuthSessionDTO>> {
+    const rateCheck = RateLimiter.isAllowed(
+      `reg-${input.email}`,
+      5,
+      60000,
+    );
+    if (!rateCheck.allowed) {
+      throw new HttpException(
+        "AUTH_RATE_LIMITED: Too many registration attempts. Please wait.",
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
     const data = await this.authService.register(input);
     return {
       success: true,
@@ -41,6 +57,18 @@ export class AuthController {
     summary: "Authenticate credentials and create secure session",
   })
   async login(@Body() input: LoginInput): Promise<APIResponse<AuthSessionDTO>> {
+    const rateCheck = RateLimiter.isAllowed(
+      `login-${input.email.toLowerCase()}`,
+      5,
+      60000,
+    );
+    if (!rateCheck.allowed) {
+      throw new HttpException(
+        "AUTH_RATE_LIMITED: Too many login attempts. Please try again later.",
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
     const data = await this.authService.login(input);
     return {
       success: true,
@@ -75,6 +103,19 @@ export class AuthController {
     return {
       success: true,
       data: { message: "Logged out successfully" },
+      meta: { timestamp: new Date().toISOString(), version: "v1" },
+    };
+  }
+
+  @Post("verify-email")
+  @ApiOperation({ summary: "Verify email address using secure token" })
+  async verifyEmail(
+    @Body() input: VerifyEmailInput,
+  ): Promise<APIResponse<{ message: string }>> {
+    const data = await this.authService.verifyEmail(input.token);
+    return {
+      success: true,
+      data,
       meta: { timestamp: new Date().toISOString(), version: "v1" },
     };
   }
@@ -123,6 +164,18 @@ export class AuthController {
   async forgotPassword(
     @Body() input: ForgotPasswordInput,
   ): Promise<APIResponse<{ message: string }>> {
+    const rateCheck = RateLimiter.isAllowed(
+      `forgot-${input.email.toLowerCase()}`,
+      3,
+      60000,
+    );
+    if (!rateCheck.allowed) {
+      throw new HttpException(
+        "AUTH_RATE_LIMITED: Too many password reset requests.",
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
     const data = await this.authService.forgotPassword(input);
     return {
       success: true,

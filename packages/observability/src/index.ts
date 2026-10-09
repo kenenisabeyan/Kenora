@@ -29,18 +29,16 @@ export function createLogger(config: LoggerConfig) {
   return pino(options);
 }
 
+import { AsyncLocalStorage } from "node:async_hooks";
+
+const correlationStorage = new AsyncLocalStorage<string>();
+
 export class CorrelationContext {
-  private static currentRequestId: string | null = null;
-
-  static setRequestId(id: string) {
-    this.currentRequestId = id;
+  static run<T>(requestId: string, callback: () => T): T {
+    return correlationStorage.run(requestId, callback);
   }
 
-  static getRequestId(): string | null {
-    return this.currentRequestId;
-  }
-
-  static clear() {
-    this.currentRequestId = null;
+  static getRequestId(): string | undefined {
+    return correlationStorage.getStore();
   }
 }

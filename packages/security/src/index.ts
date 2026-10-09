@@ -1,5 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
 
 /**
  * Tenant Context Interface
@@ -138,7 +139,7 @@ export class AuthorizationService {
 }
 
 export class PasswordHasher {
-  private static readonly SALT_ROUNDS = 12;
+  private static readonly SALT_ROUNDS = process.env.NODE_ENV === "test" ? 4 : 12;
 
   static async hash(password: string): Promise<string> {
     if (!password || password.length < 8) {
@@ -150,6 +151,117 @@ export class PasswordHasher {
   static async compare(plainText: string, hashed: string): Promise<boolean> {
     if (!plainText || !hashed) return false;
     return bcrypt.compare(plainText, hashed);
+  }
+}
+
+/**
+ * Sliding Window In-Memory / Redis Rate Limiter Foundation
+ */
+export class RateLimiter {
+  private static hits = new Map<string, number[]>();
+
+  static isAllowed(
+    key: string,
+    limit: number,
+    windowMs: number,
+  ): { allowed: boolean; remaining: number; resetMs: number } {
+    const now = Date.now();
+    const timestamps = (this.hits.get(key) || []).filter(
+      (t) => now - t < windowMs,
+    );
+
+    if (timestamps.length >= limit) {
+      const oldestHit = timestamps[0];
+      const resetMs = oldestHit + windowMs - now;
+      return { allowed: false, remaining: 0, resetMs };
+    }
+
+    timestamps.push(now);
+    this.hits.set(key, timestamps);
+    return {
+      allowed: true,
+      remaining: limit - timestamps.length,
+      resetMs: windowMs,
+    };
+  }
+
+  static clear(): void {
+    this.hits.clear();
+  }
+}
+
+/**
+ * Cryptographic Token & CSRF Strategy
+ */
+export class CsrfProtection {
+  static generateToken(): string {
+    return crypto.randomBytes(32).toString("hex");
+  }
+
+  static verifyToken(clientToken: string, cookieToken: string): boolean {
+    if (!clientToken || !cookieToken) return false;
+    if (clientToken.length !== cookieToken.length) return false;
+    return crypto.timingSafeEqual(
+      Buffer.from(clientToken),
+      Buffer.from(cookieToken),
+    );
+  }
+}
+
+/**
+ * Audit Logging Event Vocabulary & Security Logger
+ */
+export type AuditEventType =
+  | "user.registered"
+  | "user.login.success"
+  | "user.login.failed"
+  | "user.logout"
+  | "user.email.verified"
+  | "user.password.reset.requested"
+  | "user.password.changed"
+  | "organization.created"
+  | "membership.created"
+  | "membership.updated"
+  | "membership.removed"
+  | "organization.context.changed";
+
+export interface AuditEventPayload {
+  eventType: AuditEventType;
+  actorId?: string;
+  organizationId?: string;
+  correlationId?: string;
+  ipAddress?: string;
+  outcome: "success" | "denied" | "error";
+  metadata?: Record<string, unknown>;
+  timestamp?: string;
+}
+
+export class AuditLogger {
+  private static events: AuditEventPayload[] = [];
+
+  static log(event: AuditEventPayload): AuditEventPayload {
+    const record: AuditEventPayload = {
+      ...event,
+      timestamp: event.timestamp || new Date().toISOString(),
+    };
+    this.events.push(record);
+    if (process.env.NODE_ENV !== "test") {
+      console.log(
+        `[AUDIT EVENT] Type: ${record.eventType} | Actor: ${record.actorId || "anon"} | Org: ${record.organizationId || "none"} | Outcome: ${record.outcome}`,
+      );
+    }
+    return record;
+  }
+
+  static getEvents(organizationId?: string): AuditEventPayload[] {
+    if (organizationId) {
+      return this.events.filter((e) => e.organizationId === organizationId);
+    }
+    return [...this.events];
+  }
+
+  static clear(): void {
+    this.events = [];
   }
 }
 
@@ -171,14 +283,12 @@ export interface IEmailService {
 
 /**
  * Development-Only Log Email Service Provider
- * Clearly marked: Development logging behavior only. Production requires SendGrid/SES provider.
  */
 export class DevelopmentEmailService implements IEmailService {
   async sendEmail(
     payload: SendEmailPayload,
   ): Promise<{ success: boolean; messageId: string }> {
     const messageId = `dev-msg-${Date.now()}`;
-    // Development environment trace logging without exposing raw secret tokens
     if (
       process.env.NODE_ENV === "development" ||
       process.env.NODE_ENV === "test"

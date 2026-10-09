@@ -20,9 +20,7 @@ export class SourcesService {
   ];
 
   async listSources(tenantId: string): Promise<SourceDTO[]> {
-    return this.sources.filter(
-      (s) => s.tenantId === tenantId || tenantId === "tenant-default",
-    );
+    return this.sources.filter((s) => s.tenantId === tenantId);
   }
 
   async createSource(

@@ -394,4 +394,62 @@ export class AuthService {
         "Password reset successful. Please log in with your new password.",
     };
   }
+
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    const record = this.verificationTokens.get(token);
+    if (!record || record.used || new Date(record.expiresAt) < new Date()) {
+      throw new BadRequestException(
+        "AUTH_INVALID_TOKEN: Verification token invalid or expired",
+      );
+    }
+
+    const user = this.users.get(record.userId);
+    if (!user) {
+      throw new BadRequestException("AUTH_USER_NOT_FOUND");
+    }
+
+    user.isEmailVerified = true;
+    user.updatedAt = new Date().toISOString();
+    record.used = true;
+
+    return { message: "Email address verified successfully" };
+  }
+
+  getOrganization(id: string): OrganizationDTO | undefined {
+    return this.organizations.get(id);
+  }
+
+  getOrganizationBySlug(slug: string): OrganizationDTO | undefined {
+    return Array.from(this.organizations.values()).find(
+      (o) => o.slug.toLowerCase() === slug.toLowerCase(),
+    );
+  }
+
+  addOrganization(org: OrganizationDTO): void {
+    this.organizations.set(org.id, org);
+  }
+
+  addMembership(membership: MembershipDTO): void {
+    this.memberships.push(membership);
+  }
+
+  getOrganizationMemberships(organizationId: string): MembershipDTO[] {
+    return this.memberships.filter((m) => m.organizationId === organizationId);
+  }
+
+  findUserByEmail(email: string): UserDTO | undefined {
+    const user = Array.from(this.users.values()).find(
+      (u) => u.email === email.toLowerCase(),
+    );
+    if (!user) return undefined;
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      isEmailVerified: user.isEmailVerified,
+      status: user.status,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
+  }
 }

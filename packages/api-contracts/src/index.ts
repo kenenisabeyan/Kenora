@@ -16,6 +16,12 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1, "Verification token is required"),
+});
+
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
+
 export const createOrgSchema = z.object({
   name: z.string().min(1, "Organization name is required").max(100),
   slug: z
@@ -28,10 +34,17 @@ export const createOrgSchema = z.object({
 export type CreateOrgInput = z.infer<typeof createOrgSchema>;
 
 export const switchOrgSchema = z.object({
-  organizationId: z.string().uuid("Invalid organization ID format"),
+  organizationId: z.string().min(1, "Invalid organization ID format"),
 });
 
 export type SwitchOrgInput = z.infer<typeof switchOrgSchema>;
+
+export const inviteMemberSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  role: z.enum(["OWNER", "ADMIN", "MEMBER"]).default("MEMBER"),
+});
+
+export type InviteMemberInput = z.infer<typeof inviteMemberSchema>;
 
 export const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),

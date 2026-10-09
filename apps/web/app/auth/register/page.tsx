@@ -32,7 +32,7 @@ export default function RegisterPage() {
         );
       }
 
-      localStorage.setItem("kenora_session_token", json.data.sessionId);
+      document.cookie = `kenora_session_token=${json.data.sessionId}; path=/; SameSite=Strict`;
       router.push("/");
     } catch (err: any) {
       setError(err.message || "Registration failed. Please check inputs.");

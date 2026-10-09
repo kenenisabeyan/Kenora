@@ -28,6 +28,7 @@ export class KnowledgeService {
     query: QueryKnowledgeInput,
   ): Promise<PaginatedResult<KnowledgeItemDTO>> {
     const filtered = this.items.filter((item) => {
+      if (item.tenantId !== tenantId) return false;
       if (query.contentType && item.contentType !== query.contentType)
         return false;
       if (

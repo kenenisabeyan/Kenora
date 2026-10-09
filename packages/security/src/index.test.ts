@@ -1,10 +1,13 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import {
   TenantContext,
   AuthorizationService,
   Permissions,
   PasswordHasher,
   ExternalDataSanitizer,
+  RateLimiter,
+  CsrfProtection,
+  AuditLogger,
 } from "./index.js";
 
 describe("TenantContext (AsyncLocalStorage Isolation)", () => {
@@ -97,6 +100,54 @@ describe("PasswordHasher", () => {
     await expect(PasswordHasher.hash("short")).rejects.toThrow(
       "at least 8 characters",
     );
+  });
+});
+
+describe("RateLimiter", () => {
+  beforeEach(() => {
+    RateLimiter.clear();
+  });
+
+  it("should enforce hit limits within window timeframe", () => {
+    const key = "ip-127.0.0.1-login";
+    expect(RateLimiter.isAllowed(key, 2, 60000).allowed).toBe(true);
+    expect(RateLimiter.isAllowed(key, 2, 60000).allowed).toBe(true);
+    expect(RateLimiter.isAllowed(key, 2, 60000).allowed).toBe(false);
+  });
+});
+
+describe("CsrfProtection", () => {
+  it("should generate and verify matching CSRF tokens using constant-time comparison", () => {
+    const token = CsrfProtection.generateToken();
+    expect(token).toBeDefined();
+    expect(CsrfProtection.verifyToken(token, token)).toBe(true);
+    expect(CsrfProtection.verifyToken(token, "invalid-token")).toBe(false);
+  });
+});
+
+describe("AuditLogger", () => {
+  beforeEach(() => {
+    AuditLogger.clear();
+  });
+
+  it("should record security audit logs and allow tenant filtering", () => {
+    AuditLogger.log({
+      eventType: "user.registered",
+      actorId: "usr-1",
+      organizationId: "org-alpha",
+      outcome: "success",
+    });
+
+    AuditLogger.log({
+      eventType: "user.login.failed",
+      actorId: "usr-2",
+      organizationId: "org-beta",
+      outcome: "denied",
+    });
+
+    const alphaLogs = AuditLogger.getEvents("org-alpha");
+    expect(alphaLogs.length).toBe(1);
+    expect(alphaLogs[0].eventType).toBe("user.registered");
   });
 });
 
