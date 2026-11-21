@@ -1,5 +1,7 @@
 import pino, { LoggerOptions } from "pino";
 
+export * from "./resilience.js";
+
 export interface LoggerConfig {
   serviceName: string;
   level?: string;
