@@ -3,12 +3,10 @@ import {
   Post,
   Get,
   Body,
+  UseGuards,
   Headers,
-  UnauthorizedException,
-  HttpException,
-  HttpStatus,
 } from "@nestjs/common";
-import { ApiTags, ApiOperation } from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { AuthService } from "./auth.service.js";
 import { AuthSessionDTO, APIResponse } from "@kenora/types";
 import {
@@ -20,30 +18,27 @@ import {
   ChangePasswordInput,
   VerifyEmailInput,
 } from "@kenora/api-contracts";
-import { RateLimiter } from "@kenora/security";
+import {
+  Public,
+  RateLimit,
+  RateLimitGuard,
+  SessionAuthGuard,
+  CurrentSession,
+} from "../../common/index.js";
 
 @ApiTags("Authentication")
 @Controller("auth")
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ keyPrefix: "reg", limit: 5, windowMs: 60000 })
   @Post("register")
   @ApiOperation({ summary: "Register new account and primary organization" })
   async register(
     @Body() input: RegisterInput,
   ): Promise<APIResponse<AuthSessionDTO>> {
-    const rateCheck = RateLimiter.isAllowed(
-      `reg-${input.email}`,
-      5,
-      60000,
-    );
-    if (!rateCheck.allowed) {
-      throw new HttpException(
-        "AUTH_RATE_LIMITED: Too many registration attempts. Please wait.",
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
-    }
-
     const data = await this.authService.register(input);
     return {
       success: true,
@@ -52,23 +47,14 @@ export class AuthController {
     };
   }
 
+  @Public()
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ keyPrefix: "login", limit: 5, windowMs: 60000 })
   @Post("login")
   @ApiOperation({
     summary: "Authenticate credentials and create secure session",
   })
   async login(@Body() input: LoginInput): Promise<APIResponse<AuthSessionDTO>> {
-    const rateCheck = RateLimiter.isAllowed(
-      `login-${input.email.toLowerCase()}`,
-      5,
-      60000,
-    );
-    if (!rateCheck.allowed) {
-      throw new HttpException(
-        "AUTH_RATE_LIMITED: Too many login attempts. Please try again later.",
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
-    }
-
     const data = await this.authService.login(input);
     return {
       success: true,
@@ -77,29 +63,30 @@ export class AuthController {
     };
   }
 
+  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @Get("me")
   @ApiOperation({
     summary: "Get current authenticated user session and active tenant context",
   })
   async me(
-    @Headers("authorization") authHeader?: string,
+    @CurrentSession() session: AuthSessionDTO,
   ): Promise<APIResponse<AuthSessionDTO>> {
-    const token = this.extractToken(authHeader);
-    const data = await this.authService.validateSession(token);
     return {
       success: true,
-      data,
+      data: session,
       meta: { timestamp: new Date().toISOString(), version: "v1" },
     };
   }
 
+  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @Post("logout")
   @ApiOperation({ summary: "Invalidate current session" })
   async logout(
-    @Headers("authorization") authHeader?: string,
+    @CurrentSession() session: AuthSessionDTO,
   ): Promise<APIResponse<{ message: string }>> {
-    const token = this.extractToken(authHeader);
-    await this.authService.logout(token);
+    await this.authService.logout(session.sessionId);
     return {
       success: true,
       data: { message: "Logged out successfully" },
@@ -107,6 +94,7 @@ export class AuthController {
     };
   }
 
+  @Public()
   @Post("verify-email")
   @ApiOperation({ summary: "Verify email address using secure token" })
   async verifyEmail(
@@ -120,17 +108,18 @@ export class AuthController {
     };
   }
 
+  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @Post("switch-organization")
   @ApiOperation({
     summary: "Switch active organization context safely on server side",
   })
   async switchOrganization(
-    @Headers("authorization") authHeader: string | undefined,
+    @CurrentSession() session: AuthSessionDTO,
     @Body() input: SwitchOrgInput,
   ): Promise<APIResponse<AuthSessionDTO>> {
-    const token = this.extractToken(authHeader);
     const data = await this.authService.switchOrganization(
-      token,
+      session.sessionId,
       input.organizationId,
     );
     return {
@@ -140,16 +129,20 @@ export class AuthController {
     };
   }
 
+  @ApiBearerAuth()
+  @UseGuards(SessionAuthGuard)
   @Post("change-password")
   @ApiOperation({
     summary: "Change password for authenticated user and revoke other sessions",
   })
   async changePassword(
-    @Headers("authorization") authHeader: string | undefined,
+    @CurrentSession() session: AuthSessionDTO,
     @Body() input: ChangePasswordInput,
   ): Promise<APIResponse<{ message: string }>> {
-    const token = this.extractToken(authHeader);
-    const data = await this.authService.changePassword(token, input);
+    const data = await this.authService.changePassword(
+      session.sessionId,
+      input,
+    );
     return {
       success: true,
       data,
@@ -157,6 +150,9 @@ export class AuthController {
     };
   }
 
+  @Public()
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ keyPrefix: "forgot", limit: 3, windowMs: 60000 })
   @Post("forgot-password")
   @ApiOperation({
     summary: "Initiate password reset flow with generic public response",
@@ -164,18 +160,6 @@ export class AuthController {
   async forgotPassword(
     @Body() input: ForgotPasswordInput,
   ): Promise<APIResponse<{ message: string }>> {
-    const rateCheck = RateLimiter.isAllowed(
-      `forgot-${input.email.toLowerCase()}`,
-      3,
-      60000,
-    );
-    if (!rateCheck.allowed) {
-      throw new HttpException(
-        "AUTH_RATE_LIMITED: Too many password reset requests.",
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
-    }
-
     const data = await this.authService.forgotPassword(input);
     return {
       success: true,
@@ -184,6 +168,7 @@ export class AuthController {
     };
   }
 
+  @Public()
   @Post("reset-password")
   @ApiOperation({ summary: "Reset password using valid reset token" })
   async resetPassword(
@@ -195,18 +180,5 @@ export class AuthController {
       data,
       meta: { timestamp: new Date().toISOString(), version: "v1" },
     };
-  }
-
-  private extractToken(authHeader?: string): string {
-    if (!authHeader) {
-      throw new UnauthorizedException(
-        "AUTH_MISSING_TOKEN: Authorization header required",
-      );
-    }
-    const parts = authHeader.split(" ");
-    if (parts.length === 2 && parts[0] === "Bearer") {
-      return parts[1];
-    }
-    return authHeader;
   }
 }

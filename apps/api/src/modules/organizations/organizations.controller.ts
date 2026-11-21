@@ -4,16 +4,28 @@ import {
   Post,
   Body,
   Param,
-  Headers,
-  UnauthorizedException,
+  UseGuards,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { OrganizationsService } from "./organizations.service.js";
-import { OrganizationDTO, MembershipDTO, APIResponse } from "@kenora/types";
+import {
+  OrganizationDTO,
+  MembershipDTO,
+  AuthSessionDTO,
+  APIResponse,
+} from "@kenora/types";
 import { CreateOrgInput, InviteMemberInput } from "@kenora/api-contracts";
+import { Permissions } from "@kenora/security";
+import {
+  SessionAuthGuard,
+  PermissionsGuard,
+  RequirePermission,
+  CurrentSession,
+} from "../../common/index.js";
 
 @ApiTags("Organizations")
 @ApiBearerAuth()
+@UseGuards(SessionAuthGuard, PermissionsGuard)
 @Controller("organizations")
 export class OrganizationsController {
   constructor(private readonly orgsService: OrganizationsService) {}
@@ -23,10 +35,9 @@ export class OrganizationsController {
     summary: "List all organizations the authenticated user belongs to",
   })
   async listUserOrganizations(
-    @Headers("authorization") authHeader?: string,
+    @CurrentSession() session: AuthSessionDTO,
   ): Promise<APIResponse<OrganizationDTO[]>> {
-    const token = this.extractToken(authHeader);
-    const data = await this.orgsService.listUserOrganizations(token);
+    const data = await this.orgsService.listUserOrganizations(session.sessionId);
     return {
       success: true,
       data,
@@ -39,13 +50,15 @@ export class OrganizationsController {
     summary: "Create a new organization (caller becomes OWNER)",
   })
   async createOrganization(
-    @Headers("authorization") authHeader: string | undefined,
+    @CurrentSession() session: AuthSessionDTO,
     @Body() input: CreateOrgInput,
   ): Promise<
     APIResponse<{ organization: OrganizationDTO; membership: MembershipDTO }>
   > {
-    const token = this.extractToken(authHeader);
-    const data = await this.orgsService.createOrganization(token, input);
+    const data = await this.orgsService.createOrganization(
+      session.sessionId,
+      input,
+    );
     return {
       success: true,
       data,
@@ -56,11 +69,10 @@ export class OrganizationsController {
   @Get(":id")
   @ApiOperation({ summary: "Get organization details by ID" })
   async getOrganization(
-    @Headers("authorization") authHeader: string | undefined,
+    @CurrentSession() session: AuthSessionDTO,
     @Param("id") id: string,
   ): Promise<APIResponse<OrganizationDTO>> {
-    const token = this.extractToken(authHeader);
-    const data = await this.orgsService.getOrganization(token, id);
+    const data = await this.orgsService.getOrganization(session.sessionId, id);
     return {
       success: true,
       data,
@@ -69,15 +81,18 @@ export class OrganizationsController {
   }
 
   @Get(":id/members")
+  @RequirePermission(Permissions.MEMBER_READ)
   @ApiOperation({
     summary: "List members of an organization (requires member:read permission)",
   })
   async listOrganizationMembers(
-    @Headers("authorization") authHeader: string | undefined,
+    @CurrentSession() session: AuthSessionDTO,
     @Param("id") id: string,
   ): Promise<APIResponse<MembershipDTO[]>> {
-    const token = this.extractToken(authHeader);
-    const data = await this.orgsService.listOrganizationMembers(token, id);
+    const data = await this.orgsService.listOrganizationMembers(
+      session.sessionId,
+      id,
+    );
     return {
       success: true,
       data,
@@ -86,33 +101,24 @@ export class OrganizationsController {
   }
 
   @Post(":id/members")
+  @RequirePermission(Permissions.MEMBER_INVITE)
   @ApiOperation({
     summary: "Invite a new member to an organization (requires member:invite permission)",
   })
   async inviteMember(
-    @Headers("authorization") authHeader: string | undefined,
+    @CurrentSession() session: AuthSessionDTO,
     @Param("id") id: string,
     @Body() input: InviteMemberInput,
   ): Promise<APIResponse<MembershipDTO>> {
-    const token = this.extractToken(authHeader);
-    const data = await this.orgsService.inviteMember(token, id, input);
+    const data = await this.orgsService.inviteMember(
+      session.sessionId,
+      id,
+      input,
+    );
     return {
       success: true,
       data,
       meta: { timestamp: new Date().toISOString(), version: "v1" },
     };
-  }
-
-  private extractToken(authHeader?: string): string {
-    if (!authHeader) {
-      throw new UnauthorizedException(
-        "AUTH_MISSING_TOKEN: Authorization header required",
-      );
-    }
-    const parts = authHeader.split(" ");
-    if (parts.length === 2 && parts[0] === "Bearer") {
-      return parts[1];
-    }
-    return authHeader;
   }
 }

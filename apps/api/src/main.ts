@@ -4,6 +4,11 @@ import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { createLogger } from "@kenora/observability";
 import { env } from "@kenora/config";
+import {
+  GlobalExceptionFilter,
+  TenantContextInterceptor,
+  TransformResponseInterceptor,
+} from "./common/index.js";
 
 const logger = createLogger({ serviceName: "kenora-api" });
 
@@ -19,6 +24,12 @@ async function bootstrap() {
       transform: true,
       forbidNonWhitelisted: true,
     }),
+  );
+
+  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalInterceptors(
+    new TenantContextInterceptor(),
+    new TransformResponseInterceptor(),
   );
 
   const config = new DocumentBuilder()
