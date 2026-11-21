@@ -4,6 +4,7 @@ import { SourcesModule } from "./modules/sources/sources.module.js";
 import { KnowledgeModule } from "./modules/knowledge/knowledge.module.js";
 import { AuthModule } from "./modules/auth/auth.module.js";
 import { OrganizationsModule } from "./modules/organizations/organizations.module.js";
+import { AuditModule } from "./modules/audit/audit.module.js";
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { OrganizationsModule } from "./modules/organizations/organizations.modul
     KnowledgeModule,
     AuthModule,
     OrganizationsModule,
+    AuditModule,
   ],
 })
 export class AppModule {}
