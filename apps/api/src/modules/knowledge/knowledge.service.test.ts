@@ -23,7 +23,7 @@ describe("KnowledgeService & Hybrid RRF Search + Bayesian Verification", () => {
   it("should return empty result for a different tenant (IDOR isolation)", async () => {
     const result = await knowledgeService.queryKnowledge(
       "tenant-other",
-      { query: "Architecture" },
+      { query: "Architecture", page: 1, limit: 10 },
       "hybrid",
     );
 
