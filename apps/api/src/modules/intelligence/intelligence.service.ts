@@ -21,6 +21,8 @@ import {
   AIBenchmarkReproductionVerifier,
 } from "@kenora/verification";
 import { KenoraAgentClusterOrchestrator } from "@kenora/agents";
+import { InMemoryDomainEventBus, EventTopics } from "@kenora/events";
+import { AuditLogger } from "@kenora/security";
 import crypto from "node:crypto";
 
 @Injectable()
@@ -31,6 +33,7 @@ export class IntelligenceService {
   private msvfAdjudicator = new MSVFConflictAdjudicator();
   private benchmarkVerifier = new AIBenchmarkReproductionVerifier();
   private clusterOrchestrator = new KenoraAgentClusterOrchestrator();
+  private eventBus = new InMemoryDomainEventBus();
 
   // In-memory cache of daily briefings per tenant:date
   private dailyBriefings = new Map<string, DailyProfessionalIntelligenceReport>();
@@ -121,6 +124,14 @@ export class IntelligenceService {
     };
 
     this.dailyBriefings.set(cacheKey, report);
+
+    // Publish domain event
+    await this.eventBus.publish(
+      EventTopics.DAILY_INTELLIGENCE_SYNTHESIZED,
+      tenantId,
+      { reportId: report.id, userId, date: today },
+    );
+
     return report;
   }
 
@@ -131,7 +142,15 @@ export class IntelligenceService {
     tenantId: string,
     entity: Omit<LPKGEntity, "id" | "createdAt" | "updatedAt">,
   ): Promise<LPKGEntity> {
-    return this.lpkgStore.createEntity(tenantId, entity);
+    const created = await this.lpkgStore.createEntity(tenantId, entity);
+
+    await this.eventBus.publish(
+      EventTopics.KNOWLEDGE_ENTITY_CREATED,
+      tenantId,
+      { entityId: created.id, name: created.name, type: created.entityType },
+    );
+
+    return created;
   }
 
   async supersedeGraphEntity(
@@ -140,14 +159,34 @@ export class IntelligenceService {
     updatedData: Partial<LPKGEntity>,
     reason: string,
   ): Promise<{ previousEntity: LPKGEntity; updatedEntity: LPKGEntity }> {
-    return this.lpkgStore.supersedeEntity(tenantId, existingEntityId, updatedData, reason);
+    const result = await this.lpkgStore.supersedeEntity(tenantId, existingEntityId, updatedData, reason);
+
+    await this.eventBus.publish(
+      EventTopics.KNOWLEDGE_ENTITY_SUPERSEDED,
+      tenantId,
+      {
+        previousId: result.previousEntity.id,
+        updatedId: result.updatedEntity.id,
+        reason,
+      },
+    );
+
+    return result;
   }
 
   async createGraphRelation(
     tenantId: string,
     relation: Omit<LPKGRelation, "id" | "createdAt">,
   ): Promise<LPKGRelation> {
-    return this.lpkgStore.createRelation(tenantId, relation);
+    const created = await this.lpkgStore.createRelation(tenantId, relation);
+
+    await this.eventBus.publish(
+      EventTopics.KNOWLEDGE_RELATIONSHIP_CREATED,
+      tenantId,
+      { relationId: created.id, relationType: created.relationType },
+    );
+
+    return created;
   }
 
   async queryGraphSnapshot(
@@ -172,7 +211,19 @@ export class IntelligenceService {
     stanceA: { claimText: string; evidence: any[] },
     stanceB: { claimText: string; evidence: any[] },
   ) {
-    return this.msvfAdjudicator.adjudicateConflict(claimId, stanceA, stanceB);
+    const adjudication = await this.msvfAdjudicator.adjudicateConflict(claimId, stanceA, stanceB);
+
+    await this.eventBus.publish(
+      EventTopics.CONFLICT_ADJUDICATED,
+      "system",
+      {
+        claimId,
+        step: adjudication.resolutionStep,
+        isUnresolved: adjudication.isUnresolvedConflict,
+      },
+    );
+
+    return adjudication;
   }
 
   /**
@@ -185,13 +236,26 @@ export class IntelligenceService {
     vendorReportedScore: number,
     reproductions: AIBenchmarkReproduction[],
   ): Promise<AIBenchmarkRecord> {
-    return this.benchmarkVerifier.evaluateBenchmark(
+    const evaluated = await this.benchmarkVerifier.evaluateBenchmark(
       recordId,
       modelId,
       benchmarkName,
       vendorReportedScore,
       reproductions,
     );
+
+    await this.eventBus.publish(
+      EventTopics.BENCHMARK_VERIFIED,
+      "system",
+      {
+        recordId: evaluated.id,
+        modelId: evaluated.modelId,
+        status: evaluated.verificationStatus,
+        effectiveScore: evaluated.effectiveScore,
+      },
+    );
+
+    return evaluated;
   }
 
   /**
@@ -199,5 +263,9 @@ export class IntelligenceService {
    */
   getAgentClustersStatus(): ClusterStatus[] {
     return this.clusterOrchestrator.getAllClustersStatus();
+  }
+
+  getEventBus(): InMemoryDomainEventBus {
+    return this.eventBus;
   }
 }

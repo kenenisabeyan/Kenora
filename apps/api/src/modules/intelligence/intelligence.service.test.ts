@@ -157,4 +157,13 @@ describe("IntelligenceService (Whitepaper V3 Implementation)", () => {
       expect(totalAgents).toBe(28);
     });
   });
+
+  describe("Domain Event Bus Integration", () => {
+    it("should publish domain events for intelligence synthesis and graph operations", async () => {
+      await service.getOrGenerateDailyReport(tenantId, userId, []);
+      const events = service.getEventBus().getPublishedEvents(tenantId);
+      expect(events.length).toBeGreaterThan(0);
+      expect(events[0].topic).toBe("daily.intelligence.synthesized");
+    });
+  });
 });

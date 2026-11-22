@@ -8,6 +8,7 @@ import {
   boolean,
   index,
   customType,
+  numeric,
 } from "drizzle-orm/pg-core";
 
 // Custom pgvector type definition for vector embeddings
@@ -235,4 +236,131 @@ export const auditLogs = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [index("idx_audit_logs_org_id").on(table.organizationId)],
+);
+
+/**
+ * Living Professional Knowledge Graph (LPKG) Persistence Tables
+ * Temporal intervals, non-destructive supersession, and evolution histories
+ */
+export const lpkgEntities = pgTable(
+  "lpkg_entities",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    organizationId: uuid("organization_id")
+      .references(() => organizations.id, { onDelete: "cascade" })
+      .notNull(),
+    name: text("name").notNull(),
+    entityType: text("entity_type").notNull(), // technology, framework, pattern, organization, concept, standard
+    validFrom: timestamp("valid_from").notNull(),
+    validTo: timestamp("valid_to"),
+    status: text("status").default("active").notNull(), // active, superseded, deprecated
+    attributes: jsonb("attributes").default({}).notNull(),
+    confidenceScore: integer("confidence_score").default(100).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_lpkg_entities_org").on(table.organizationId),
+    index("idx_lpkg_entities_name").on(table.name),
+    index("idx_lpkg_entities_status").on(table.status),
+    index("idx_lpkg_entities_valid_from").on(table.validFrom),
+  ],
+);
+
+export const lpkgRelations = pgTable(
+  "lpkg_relations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    organizationId: uuid("organization_id")
+      .references(() => organizations.id, { onDelete: "cascade" })
+      .notNull(),
+    sourceEntityId: uuid("source_entity_id")
+      .references(() => lpkgEntities.id, { onDelete: "cascade" })
+      .notNull(),
+    targetEntityId: uuid("target_entity_id")
+      .references(() => lpkgEntities.id, { onDelete: "cascade" })
+      .notNull(),
+    relationType: text("relation_type").notNull(), // implements, supersedes, deprecates, integrates_with, conflicts_with, derived_from
+    validFrom: timestamp("valid_from").notNull(),
+    validTo: timestamp("valid_to"),
+    status: text("status").default("current").notNull(),
+    confidenceScore: integer("confidence_score").default(100).notNull(),
+    evidenceItemIds: jsonb("evidence_item_ids").default([]).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_lpkg_relations_org").on(table.organizationId),
+    index("idx_lpkg_relations_source").on(table.sourceEntityId),
+    index("idx_lpkg_relations_target").on(table.targetEntityId),
+  ],
+);
+
+export const lpkgEvolutionTimelines = pgTable(
+  "lpkg_evolution_timelines",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    organizationId: uuid("organization_id")
+      .references(() => organizations.id, { onDelete: "cascade" })
+      .notNull(),
+    entityId: uuid("entity_id")
+      .references(() => lpkgEntities.id, { onDelete: "cascade" })
+      .notNull(),
+    versionNumber: integer("version_number").notNull(),
+    supersededBy: uuid("superseded_by"),
+    supersedingReason: text("superseding_reason"),
+    entitySnapshot: jsonb("entity_snapshot").default({}).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_lpkg_timelines_org").on(table.organizationId),
+    index("idx_lpkg_timelines_entity").on(table.entityId),
+  ],
+);
+
+/**
+ * AI Ecosystem Intelligence Tables
+ */
+export const aiBenchmarkRecords = pgTable(
+  "ai_benchmark_records",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    organizationId: uuid("organization_id")
+      .references(() => organizations.id, { onDelete: "cascade" })
+      .notNull(),
+    modelId: text("model_id").notNull(),
+    benchmarkName: text("benchmark_name").notNull(),
+    vendorReportedScore: integer("vendor_reported_score").notNull(),
+    effectiveScore: integer("effective_score").notNull(),
+    verificationStatus: text("verification_status").notNull(), // provisional_vendor_reported, verified_by_reproduction, disputed
+    confidenceScore: integer("confidence_score").notNull(),
+    reproductions: jsonb("reproductions").default([]).notNull(),
+    lastAuditedAt: timestamp("last_audited_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_ai_benchmarks_org").on(table.organizationId),
+    index("idx_ai_benchmarks_model").on(table.modelId),
+  ],
+);
+
+export const dailyIntelligenceReports = pgTable(
+  "daily_intelligence_reports",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    organizationId: uuid("organization_id")
+      .references(() => organizations.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    date: text("date").notNull(),
+    headline: text("headline").notNull(),
+    distillationRatio: text("distillation_ratio").notNull(),
+    nineQuestions: jsonb("nine_questions").notNull(),
+    keyInsightIds: jsonb("key_insight_ids").default([]).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_daily_reports_org").on(table.organizationId),
+    index("idx_daily_reports_user_date").on(table.userId, table.date),
+  ],
 );
