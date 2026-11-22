@@ -34,6 +34,7 @@ async function bootstrap() {
 
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalInterceptors(
+    new MetricsInterceptor(),
     new TenantContextInterceptor(),
     new TransformResponseInterceptor(),
   );
