@@ -49,4 +49,22 @@ export class AuditController {
       },
     };
   }
+
+  @Get("integrity")
+  @RequirePermission(Permissions.SETTINGS_READ)
+  @ApiOperation({
+    summary: "Cryptographic Tamper-Evidence Verification of Audit Ledger",
+    description: "Verifies the cryptographic hash-chain integrity of the audit ledger from Genesis to Tip.",
+  })
+  async verifyIntegrity() {
+    const report = this.auditService.verifyLedgerIntegrity();
+    return {
+      success: true,
+      data: report,
+      meta: {
+        timestamp: new Date().toISOString(),
+        version: "v1",
+      },
+    };
+  }
 }

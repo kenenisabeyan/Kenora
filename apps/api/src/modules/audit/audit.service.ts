@@ -1,5 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { AuditLogger, AuditEventPayload } from "@kenora/security";
+import {
+  AuditLogger,
+  AuditEventPayload,
+  CryptographicAuditLedger,
+  SecretAndPiiRedactor,
+} from "@kenora/security";
 import { PaginatedResult } from "@kenora/types";
 
 export interface QueryAuditLogsOptions {
@@ -11,6 +16,8 @@ export interface QueryAuditLogsOptions {
 
 @Injectable()
 export class AuditService {
+  private cryptoLedger = new CryptographicAuditLedger();
+
   async listAuditLogs(
     organizationId: string,
     options: QueryAuditLogsOptions = {},
@@ -42,6 +49,23 @@ export class AuditService {
   }
 
   logEvent(event: AuditEventPayload): AuditEventPayload {
-    return AuditLogger.log(event);
+    // Redact sensitive payload information before recording
+    if (event.metadata) {
+      const serialized = JSON.stringify(event.metadata);
+      const redacted = SecretAndPiiRedactor.redact(serialized);
+      try {
+        event.metadata = JSON.parse(redacted.sanitizedText);
+      } catch {
+        // Keep as-is if parsing fails
+      }
+    }
+
+    const recorded = AuditLogger.log(event);
+    this.cryptoLedger.append(recorded);
+    return recorded;
+  }
+
+  verifyLedgerIntegrity() {
+    return this.cryptoLedger.verifyIntegrity();
   }
 }
