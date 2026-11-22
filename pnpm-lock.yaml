@@ -29,6 +29,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@kenora/agents':
+        specifier: workspace:*
+        version: link:../../packages/agents
       '@kenora/api-contracts':
         specifier: workspace:*
         version: link:../../packages/api-contracts
