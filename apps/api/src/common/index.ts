@@ -11,5 +11,6 @@ export * from "./guards/rate-limit.guard.js";
 
 export * from "./interceptors/tenant-context.interceptor.js";
 export * from "./interceptors/transform-response.interceptor.js";
+export * from "./interceptors/metrics.interceptor.js";
 
 export * from "./filters/http-exception.filter.js";

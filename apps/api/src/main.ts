@@ -8,6 +8,7 @@ import {
   GlobalExceptionFilter,
   TenantContextInterceptor,
   TransformResponseInterceptor,
+  MetricsInterceptor,
 } from "./common/index.js";
 
 const logger = createLogger({ serviceName: "kenora-api" });
