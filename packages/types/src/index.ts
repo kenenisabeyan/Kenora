@@ -298,6 +298,14 @@ export interface KenoraAgentSpec {
   capabilities: string[];
 }
 
+export interface ClusterStatus {
+  cluster: AgentClusterType;
+  totalAgents: number;
+  activeAgents: number;
+  healthy: boolean;
+  agents: KenoraAgentSpec[];
+}
+
 /**
  * Daily Professional Intelligence: 9-Question Response Pipeline
  */

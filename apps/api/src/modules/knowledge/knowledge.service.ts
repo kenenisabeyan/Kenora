@@ -102,6 +102,14 @@ export class KnowledgeService {
     return verification;
   }
 
+  async listItems(
+    tenantId: string,
+    page = 1,
+    limit = 20,
+  ): Promise<PaginatedResult<KnowledgeItemDTO>> {
+    return this.queryKnowledge(tenantId, { page, limit });
+  }
+
   async addItem(item: KnowledgeItemDTO): Promise<KnowledgeItemDTO> {
     this.items.push(item);
     this.searchEngine.addItem(item);

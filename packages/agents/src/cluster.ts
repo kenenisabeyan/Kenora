@@ -1,6 +1,7 @@
 import {
   AgentClusterType,
   KenoraAgentSpec,
+  ClusterStatus,
 } from "@kenora/types";
 
 /**
@@ -215,14 +216,6 @@ export const KENORA_28_AGENTS: KenoraAgentSpec[] = [
     capabilities: ["license_compliance", "fair_use_audit"],
   },
 ];
-
-export interface ClusterStatus {
-  cluster: AgentClusterType;
-  totalAgents: number;
-  activeAgents: number;
-  healthy: boolean;
-  agents: KenoraAgentSpec[];
-}
 
 export class KenoraAgentClusterOrchestrator {
   private agentSpecs = new Map<string, KenoraAgentSpec>();
