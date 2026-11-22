@@ -1,3 +1,6 @@
+export * from "./lpkg";
+export * from "./compressor";
+
 import { KnowledgeItemDTO } from "@kenora/types";
 import crypto from "node:crypto";
 
@@ -47,7 +50,10 @@ export class DefaultKnowledgePipelineProcessor implements KnowledgePipelineProce
     const title = (rawItem.title || rawItem.name || "Untitled Intelligence Record").trim();
     const body = (rawItem.content || rawItem.body || rawItem.description || "").trim();
     const url = rawItem.url || `urn:${adapterType}:${crypto.randomUUID()}`;
-    const externalId = rawItem.externalId || rawItem.id || crypto.createHash("sha256").update(url).digest("hex").slice(0, 16);
+    const externalId =
+      rawItem.externalId ||
+      rawItem.id ||
+      crypto.createHash("sha256").update(url).digest("hex").slice(0, 16);
 
     return {
       externalId: String(externalId),
@@ -107,7 +113,8 @@ export class DefaultKnowledgePipelineProcessor implements KnowledgePipelineProce
     const text = `${item.title} ${item.body}`;
 
     // Common technology and domain entity extraction patterns
-    const techRegex = /\b(PostgreSQL|Redis|NestJS|Next\.js|Docker|Kubernetes|TypeScript|Drizzle|NATS|BullMQ|pgvector|Python)\b/gi;
+    const techRegex =
+      /\b(PostgreSQL|Redis|NestJS|Next\.js|Docker|Kubernetes|TypeScript|Drizzle|NATS|BullMQ|pgvector|Python)\b/gi;
     const matches = new Set(text.match(techRegex) || []);
 
     for (const name of matches) {

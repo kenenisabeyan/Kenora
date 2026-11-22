@@ -1,3 +1,5 @@
+export * from "./cluster";
+
 /**
  * Core Agent Specifications & Lifecycle Abstractions
  */
