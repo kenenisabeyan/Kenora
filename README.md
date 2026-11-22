@@ -1,304 +1,490 @@
-# Kenora — AI-Powered Professional Intelligence Platform
+<div align="center">
+
+# KENORA
+### The AI-Powered Professional Knowledge Infrastructure
+**The Knowledge Intelligence Layer for Professional Decision-Making**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg?logo=typescript)](https://www.typescriptlang.org/)
 [![Turborepo](https://img.shields.io/badge/Monorepo-Turborepo-EF4444.svg?logo=turborepo)](https://turbo.build/)
 [![NestJS](https://img.shields.io/badge/Backend-NestJS%2010-E0234E.svg?logo=nestjs)](https://nestjs.com/)
-[![Next.js](https://img.shields.io/badge/Frontend-Next.js%2015-black.svg?logo=next.js)](https://nextjs.org/)
-[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL%20%2B%20pgvector-336791.svg?logo=postgresql)](https://github.com/pgvector/pgvector)
-[![Redis](https://img.shields.io/badge/Cache%20%26%20Queues-Redis%20%2B%20BullMQ-DC382D.svg?logo=redis)](https://redis.io/)
+[![Next.js](https://img.shields.io/badge/Frontend-Next.js%2015%20App%20Router-black.svg?logo=next.js)](https://nextjs.org/)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL%2016%20%2B%20pgvector-336791.svg?logo=postgresql)](https://github.com/pgvector/pgvector)
+[![Redis](https://img.shields.io/badge/Cache%20%26%20Queues-Redis%207%20%2B%20BullMQ-DC382D.svg?logo=redis)](https://redis.io/)
 [![NATS](https://img.shields.io/badge/Event%20Mesh-NATS%20JetStream-27AAE1.svg?logo=nats.io)](https://nats.io/)
-[![Vitest](https://img.shields.io/badge/Testing-Vitest-6E9F18.svg?logo=vitest)](https://vitest.dev/)
-[![License](https://img.shields.io/badge/License-Proprietary-gray.svg)](#)
+[![Vitest](https://img.shields.io/badge/Testing-Vitest%20(94%2F94%20Passed)-6E9F18.svg?logo=vitest)](https://vitest.dev/)
+[![Prometheus](https://img.shields.io/badge/Observability-Prometheus%20OpenMetrics-E6522C.svg?logo=prometheus)](https://prometheus.io/)
+[![Deployment](https://img.shields.io/badge/Dual--Cloud-Vercel%20%2B%20Render-000000.svg?logo=vercel)](#-production-deployment-guide-vercel--render)
+[![License](https://img.shields.io/badge/License-Proprietary%20Commercial-gray.svg)](#)
 
-Kenora is an enterprise-grade, source-agnostic **AI Professional Knowledge & Intelligence Platform**. It ingests fragmented multi-source domain knowledge, normalizes and deduplicates data streams, extracts semantic claim triples, performs Bayesian cross-source corroboration, and delivers hybrid precision search (lexical BM25 + dense semantic vector retrieval via Reciprocal Rank Fusion) with strict multi-tenant isolation.
+*Derived from the foundational **Kenora Architecture & Vision Whitepaper v3.0** (July 2026).*
+
+</div>
 
 ---
 
-## 🏛️ System Architecture & Execution Topology
+## 📑 Table of Contents
 
-Kenora is architected as a clean, modular TypeScript monorepo powered by **pnpm workspaces** and **Turborepo**.
+1. [Executive Summary & Foundational Vision](#-executive-summary--foundational-vision)
+2. [End-to-End System Architecture](#-end-to-end-system-architecture)
+3. [The 10 Proprietary Kenora Technologies](#-the-10-proprietary-kenora-technologies)
+4. [The 28-Agent Autonomous Cluster Fleet](#-the-28-agent-autonomous-cluster-fleet)
+5. [Daily Professional Intelligence: The 9-Question Matrix](#-daily-professional-intelligence-the-9-question-matrix)
+6. [AI Ecosystem Intelligence & Dual-Reproduction Benchmarks](#-ai-ecosystem-intelligence--dual-reproduction-benchmarks)
+7. [100% Non-Functional Requirements (NFR) Engineering Rigor](#-100-non-functional-requirements-nfr-engineering-rigor)
+   - [Zero-Trust Multi-Tenancy & Cryptographic Audit Ledger](#1-zero-trust-multi-tenancy--cryptographic-audit-ledger)
+   - [Secret & PII Sanitization Redactor](#2-secret--pii-sanitization-redactor)
+   - [Prometheus Observability, Histograms & 99.99% SLA Tracker](#3-prometheus-observability-histograms--9999-sla-tracker)
+   - [High Availability, Circuit Breakers & Graceful Degradation](#4-high-availability-circuit-breakers--graceful-degradation)
+   - [Openness, Interoperability & Zero Vendor Lock-in](#5-openness-interoperability--zero-vendor-lock-in)
+8. [Workspace Topology & Package Directory](#-workspace-topology--package-directory)
+9. [Complete API Route & Contract Specification](#-complete-api-route--contract-specification)
+10. [Local Development & Quickstart](#-local-development--quickstart)
+11. [Production Deployment Guide: Vercel + Render](#-production-deployment-guide-vercel--render)
+12. [Kenora Architectural Invariants & Engineering Rules](#-kenora-architectural-invariants--engineering-rules)
+
+---
+
+## 🌐 Executive Summary & Foundational Vision
+
+The Internet solved information publishing. Search engines solved information retrieval. Social media solved information sharing. Large language models solved conversational reasoning. **None of these solved turning fragmented, unverified information into verified, connected, actionable professional intelligence—continuously, without requiring a professional to ask.**
+
+Kenora occupies this specific, unclaimed layer as the world's first **AI-Powered Professional Knowledge Infrastructure**. It ingests knowledge streams from thousands of disparate sources, normalizes them, filters noise, resolves contradictions, verifies facts through a Bayesian multi-source framework, constructs a Living Professional Knowledge Graph (LPKG), and dispatches continuous intelligence directly to practitioners.
+
+### Core Strategic Pillars
+
+* **Flagship Vertical: Kenora Developer**: Full-Stack Web Development, distributed systems, browser runtimes, security vulnerability disclosures, and cloud native engineering.
+* **Parallel Strategic Pillar: AI Ecosystem Intelligence**: Continuous monitoring, independent dual-reproduction benchmark tracking, vendor claim verification, and deprecation telemetry across LLM providers and open-weight models.
+* **Dual Uncompromising Commitments**:
+  1. **Strict Verification**: Every claim carries a traceable chain of primary evidence, epistemic confidence scores, and reasoning traces. No hallucinated authority.
+  2. **Respect for Professional Attention**: Explicitly engineered to maximize knowledge gain per minute and help technical professionals disengage, completely informed, as rapidly as possible.
+
+---
+
+## 🏛️ End-to-End System Architecture
 
 ```mermaid
 flowchart TD
-    subgraph ClientBoundary ["1. Client & Edge Layer (apps/web)"]
-        Browser[Client Web Application] --> EdgeMW["Next.js Edge Middleware<br/>(CSP, HSTS, Route Protection, Correlation ID)"]
+    subgraph ClientLayer ["1. Edge & Client Subsystem (apps/web - Vercel Edge)"]
+        Browser["React 19 / Next.js 15 Client"] --> EdgeMW["Edge Security Middleware<br/>(CSP, HSTS, CORS, Correlation ID)"]
+        EdgeMW --> Dashboard["Kenora Intelligence Console<br/>(Daily Briefings, LPKG Explorer, AI Benchmarks)"]
     end
 
-    subgraph ApiGateway ["2. NestJS API Platform (apps/api - Port 4000)"]
-        EdgeMW --> RateGuard["RateLimitGuard (Sliding-Window IP/Email Limiter)"]
-        RateGuard --> AuthGuard["SessionAuthGuard (Bearer ses_... Token Resolution)"]
-        AuthGuard --> TenantALS["TenantContextInterceptor (AsyncLocalStorage Binding)"]
-        TenantALS --> PermGuard["PermissionsGuard (RolePermissionMatrix Enforcement)"]
-        PermGuard --> ValPipe["ValidationPipe (Zod DTO Whitelisting & Transform)"]
-        ValPipe --> Controllers["Modular REST Controllers & OpenAPI 3.0 (/docs)"]
+    subgraph GatewayLayer ["2. API Platform & Security Boundary (apps/api - Render Web Service)"]
+        Dashboard --> RateLimiter["RateLimitGuard (Sliding Window Redis/Memory)"]
+        RateLimiter --> SessionGuard["SessionAuthGuard (Bearer ses_... Token Resolution)"]
+        SessionGuard --> TenantALS["TenantContextInterceptor (node:async_hooks ALS)"]
+        TenantALS --> RBACGuard["PermissionsGuard (RolePermissionMatrix Enforcement)"]
+        RBACGuard --> MetricsInter["MetricsInterceptor (Nanosecond Latency Tracking)"]
+        MetricsInter --> Controllers["NestJS REST & OpenAPI Controllers (/api/v1)"]
     end
 
-    subgraph ServiceStorage ["3. Domain Services & Persistence Layer"]
-        Controllers --> Services["Domain Business Logic Services"]
-        Services --> DB[("PostgreSQL + Drizzle ORM<br/>(Row-Level Security & pgvector 1536-dim)")]
-        Services --> Cache[("Redis Cluster<br/>(Session Tokens & Sliding Windows)")]
-        Services --> JetStream["NATS JetStream (Domain Event Backbone)"]
+    subgraph IntelligenceKernel ["3. Proprietary Intelligence & Reasoning Kernel"]
+        Controllers --> LPKG["Living Professional Knowledge Graph (LPKG)"]
+        Controllers --> MSVF["Multi-Source Verification Framework (MSVF)"]
+        Controllers --> Synth["9-Question Daily Intelligence Synthesizer"]
+        Controllers --> Bench["AI Dual-Reproduction Benchmark Engine"]
+        Controllers --> AgentFleet["28-Agent Autonomous Cluster Mesh"]
     end
 
-    subgraph WorkerCluster ["4. Background Worker Subsystem (apps/workers)"]
-        JetStream --> BullMQ["BullMQ Distributed Job Queues"]
-        BullMQ --> IngestProc["IngestionProcessor (AsyncLocalStorage Scoped)"]
-        IngestProc --> Adapters["Source Adapters (GitHub, RSS, Web)"]
-        IngestProc --> Pipeline["Knowledge Pipeline (Normalize, Dedup, Claims)"]
-        IngestProc --> Verifier["Bayesian Verification Engine"]
-        Verifier --> DB
+    subgraph SecurityAudit ["4. Cryptographic Security & Governance Kernel"]
+        Controllers --> Redactor["SecretAndPiiRedactor (AWS, GitHub, LLM, PII)"]
+        Redactor --> AuditLedger["CryptographicAuditLedger (SHA-256 Hash Chain)"]
+        Controllers --> Degradation["GracefulDegradationManager (3-State Circuit)"]
+        Controllers --> SLATracker["SlaAvailabilityTracker (Rolling 99.99% SLA)"]
+    end
+
+    subgraph DataPersistence ["5. Distributed Persistence & Event Backbone"]
+        LPKG & MSVF --> PostgreSQL[("PostgreSQL 16 + Drizzle ORM<br/>(Row-Level Security & pgvector 1536-dim HNSW)")]
+        SessionGuard & RateLimiter --> RedisCluster[("Redis Cluster 7<br/>(Session Tokens & Sliding-Window Buckets)")]
+        AgentFleet --> JetStream["NATS JetStream (Domain Event Mesh)"]
+        AgentFleet --> BullMQ["BullMQ Distributed Job Queues"]
+    end
+
+    subgraph WorkerCluster ["6. Autonomous Background Daemon (apps/workers - Render Worker)"]
+        BullMQ --> IngestWorker["IngestionProcessor (AsyncLocalStorage Scoped)"]
+        IngestWorker --> Adapters["Source Adapters (GitHub, RSS, W3C, ArXiv, Web)"]
+        IngestWorker --> Pipeline["Knowledge Pipeline (Normalize, Dedup, Extract Claims)"]
+        Pipeline --> MSVF
     end
 
     classDef client fill:#1e293b,stroke:#64748b,color:#f8fafc;
     classDef gateway fill:#0f766e,stroke:#14b8a6,color:#f8fafc;
-    classDef storage fill:#4338ca,stroke:#6366f1,color:#f8fafc;
+    classDef kernel fill:#4338ca,stroke:#6366f1,color:#f8fafc;
+    classDef security fill:#831843,stroke:#db2777,color:#f8fafc;
+    classDef storage fill:#1e1b4b,stroke:#4f46e5,color:#f8fafc;
     classDef workers fill:#7c2d12,stroke:#ea580c,color:#f8fafc;
-    class ClientBoundary client;
-    class ApiGateway gateway;
-    class ServiceStorage storage;
+
+    class ClientLayer client;
+    class GatewayLayer gateway;
+    class IntelligenceKernel kernel;
+    class SecurityAudit security;
+    class DataPersistence storage;
     class WorkerCluster workers;
 ```
 
 ---
 
-## ⚡ Core Architectural Pillars & Quality Attributes
+## 🔬 The 10 Proprietary Kenora Technologies
 
-### 1. Zero-Trust Security & Multi-Tenancy
-* **Dual-Layer Isolation (Defense-in-Depth)**:
-  - **Application Scope**: Ambient execution context managed by `node:async_hooks` (`TenantContext`), strictly isolating tenant context across promise chains.
-  - **Database Kernel Scope**: PostgreSQL Row-Level Security (RLS) policies enforcing `organization_id = current_setting('app.current_tenant_id')::uuid`.
-* **Cryptographic Invariants**:
-  - Session tokens generated via CSPRNG with 256-bit entropy (`ses_<64_hex_chars>`).
-  - Adaptive `bcryptjs` password hashing (12 rounds in production, 4 rounds in test).
-  - Side-channel timing attack mitigation via `crypto.timingSafeEqual` for all token validations.
-* **Prompt Injection Sandboxing**:
-  - `ExternalDataSanitizer` cleans ASCII control characters, strips `<script>` tags, and wraps external inputs in `<untrusted_external_content>` tags.
-
-### 2. High-Performance Hybrid Search Engine (`@kenora/search`)
-* **Multi-Modal Retrieval**:
-  - **Sparse Lexical**: Exact-match keyword frequency with title-weighting ($3\times$ multiplier).
-  - **Dense Semantic**: Cosine distance ($d_{\text{cos}} = 1 - (\mathbf{u} \cdot \mathbf{v})$) over 1536-dimensional embeddings indexed via HNSW graphs ($O(\log N)$ search latency, $p95 < 20\text{ms}$).
-  - **Reciprocal Rank Fusion (RRF)**: Merges dense and sparse rankings using smoothing parameter $k = 60$:
-    $$S_{\text{RRF}}(d) = \frac{0.35}{60 + r_{\text{lexical}}(d)} + \frac{0.65}{60 + r_{\text{semantic}}(d)}$$
-
-### 3. Bayesian Fact Verification Engine (`@kenora/verification`)
-* **Dynamic Evidence Updating**:
-  - Evaluates corroborating sources versus contradicting sources to compute posterior confidence scores ($0$ to $100$):
-    $$\text{ConfidenceScore} = \min\left(100, \; \max\left(0, \; 75 + 10 \cdot |\mathcal{S}^+| - 25 \cdot |\mathcal{S}^-|\right)\right)$$
-* **Verification State Transitions**:
-  - $\ge 80 \implies \mathbf{verified}$
-  - Contradictions exceed corroborations $\implies \mathbf{refuted}$
-  - $50 \le \text{Score} < 80 \implies \mathbf{inconclusive}$
-* **Dynamic Source Trust Tracking**:
-  - Computes historical accuracy per source adapter, penalizing inaccurate feeds over time.
-
-### 4. Reliability & Resilience Engine (`@kenora/observability`)
-* **Circuit Breaker (`CircuitBreaker`)**:
-  - Prevents cascading thread exhaustion by transitioning between `CLOSED`, `OPEN`, and `HALF_OPEN` states upon reaching configurable failure thresholds.
-* **Decorrelated Exponential Backoff with Full Random Jitter (`BackoffRetry`)**:
-  - Mitigates "thundering herd" spikes when retrying external APIs:
-    $$t_{\text{sleep}} = \min\left(t_{\text{max}}, \; \text{Uniform}\left(0, \; t_{\text{base}} \cdot 2^{\text{attempt}}\right)\right)$$
-
-### 5. High Availability & Cloud Probes (`apps/api`)
-* **Deep Health Probe (`GET /api/v1/health`)**: Validates database connection pools, Redis latency, and NATS JetStream connectivity.
-* **Kubernetes Liveness Probe (`GET /api/v1/health/liveness`)**: Verifies process responsiveness and reports uptime.
-* **Kubernetes Readiness Probe (`GET /api/v1/health/readiness`)**: Confirms downstream subsystem readiness before routing traffic.
-
-### 6. Transparency, Explainability & Auditability
-* **Immutable Compliance Audit Ledger (`GET /api/v1/audit-logs`)**:
-  - RBAC-guarded (`SETTINGS_READ`) endpoint exposing tamper-evident logs for security compliance (**SOC 2 Type II**, **ISO 27001**, **GDPR Article 30**).
-* **Explainable AI (XAI)**:
-  - Every verified claim includes evidence provenance: status, confidence score, corroborating and contradicting source IDs, and reasoning traces.
-
-### 7. Openness & Portability
-* **OpenAPI 3.0 / Swagger**: Interactive API specifications mounted at `/docs`.
-* **RFC 7807 Problem Details**: Standardized machine-readable error communication.
-* **Zero Vendor Lock-In**:
-  - **Model Portability**: Pluggable `ModelGateway` interface supporting OpenAI, Anthropic, Gemini, or local models (Ollama/vLLM).
-  - **Storage Portability**: S3-compliant interface compatible with AWS S3, Cloudflare R2, MinIO, or LocalStack.
-  - **Database Portability**: Standard PostgreSQL with `pgvector` runs across AWS Aurora, GCP Cloud SQL, Azure, bare-metal, or Docker.
+| Identifier | Technology Name | Architectural Responsibility & Implementation |
+| :--- | :--- | :--- |
+| **LPKG** | **Living Professional Knowledge Graph** | Temporal graph representing evolving concepts, tools, patterns, and libraries. Encodes semantic relationship vectors, temporal validity intervals, deprecation transitions, and supersession links. |
+| **MSVF** | **Multi-Source Verification Framework** | Bayesian cross-source corroboration engine. Applies dynamic source authority weighting, contradiction penalty gradients, and multi-tier precedence adjudication. |
+| **NKIP** | **Normalized Knowledge Ingestion Protocol** | Universal ingestion contract converting unstructured posts, changelogs, spec RFCs, security advisories, and podcasts into canonical semantic claim structures. |
+| **DTS** | **Dynamic Trust Scoring** | Time-decaying source reputation system. Calibrates source trust scores according to empirical accuracy, verified correction frequency, and historical consistency. |
+| **KCE** | **Knowledge Compounding Engine** | Synthesizes verified atomic claims into higher-order conceptual knowledge. Identifies meta-trends and architectural paradigm shifts across cross-domain nodes. |
+| **ANI** | **Autonomous Noise Identification** | Real-time heuristic and semantic filter rejecting promotional marketing, superficial listicles, low-substance churn, and synthesized spam prior to ingestion. |
+| **IKC** | **Institutional Knowledge Connectors** | High-fidelity connectors to foundational authorities (W3C, TC39, IETF, ISO, NIST, OpenSSF, GitHub Advisory DB, ArXiv) with first-tier authority precedence. |
+| **ECN** | **Epistemic Confidence Networks** | Explicit quantification of uncertainty across all claims. Labels knowledge as `CONFIRMED`, `PROVISIONAL`, `CONTESTED`, or `REFUTED` with numeric confidence vectors. |
+| **PKI** | **Professional Knowledge Interfaces** | Zero-clutter, high-signal presentation interfaces structured around the 9-Question Daily Decision Matrix, interactive LPKG visualization, and proactive alerts. |
+| **XAI** | **Explainable AI & Provenance Tracing** | Strict evidence traceability. Every claim is linked to immutable source snapshots, citation chains, contradiction logs, and model reasoning steps. |
 
 ---
 
-## 📂 Workspace Structure & Directory Map
+## 🤖 The 28-Agent Autonomous Cluster Fleet
+
+Kenora operates a specialized multi-agent mesh divided into five functional clusters. Each agent executes bounded responsibilities, communicating via typed domain events over NATS JetStream and maintaining tri-tier memory (working context, episodic session history, and semantic knowledge graph).
+
+```mermaid
+graph LR
+    subgraph C1 ["Acquisition Cluster (5 Agents)"]
+        A1[Source Ingestion Agent]
+        A2[Changelog & Release Agent]
+        A3[Community Discourse Agent]
+        A4[Academic & Spec Agent]
+        A5[Noise & Spam Rejecter]
+    end
+
+    subgraph C2 ["Understanding Cluster (6 Agents)"]
+        B1[Claim Decomposition Agent]
+        B2[Entity Disambiguation Agent]
+        B3[Taxonomy Classifier]
+        B4[Context Normalization Agent]
+        B5[Code Artifact Analyzer]
+        B6[Dependency Topology Agent]
+    end
+
+    subgraph C3 ["Verification Cluster (6 Agents)"]
+        C1A[Cross-Source Corroborator]
+        C2A[Contradiction Adjudicator]
+        C3A[Temporal Fact Decay Agent]
+        C4A[Dual-Reproduction Benchmark Agent]
+        C5A[Security Vulnerability Verifier]
+        C6A[Epistemic Confidence Scorer]
+    end
+
+    subgraph C4 ["Delivery Cluster (6 Agents)"]
+        D1[9-Question Synthesizer]
+        D2[Query Routing Agent]
+        D3[Briefing Generator]
+        D4[Proactive Alert Dispatcher]
+        D5[Code Impact Assessor]
+        D6[Personalization Coordinator]
+    end
+
+    subgraph C5 ["Governance Cluster (5 Agents)"]
+        E1[Cryptographic Audit Agent]
+        E2[Secret & PII Redactor]
+        E3[Source Trust Decayer]
+        E4[Model Bias & Safety Guard]
+        E5[SLA & Degradation Supervisor]
+    end
+
+    C1 --> C2 --> C3 --> C4
+    C5 -. Supervises & Audits .-> C1 & C2 & C3 & C4
+```
+
+---
+
+## ☀️ Daily Professional Intelligence: The 9-Question Matrix
+
+Technical professionals face severe cognitive fragmentation. Rather than an uncurated feed of links, Kenora delivers a **Daily 9-Question Intelligence Matrix** every morning, providing a comprehensive operational snapshot of the domain:
+
+| # | Question Focus | Core Intelligence Delivered | Primary Sources |
+| :-: | :--- | :--- | :--- |
+| **Q1** | **Breaking Changes & Regressions** | Incompatible breaking updates, silent behavior changes, and API removals in core frameworks. | GitHub Releases, npm/PyPI semver diffs |
+| **Q2** | **Security Advisories & CVEs** | Newly disclosed zero-days, supply-chain exploits, CVE ratings, and vetted remediation steps. | CVE, GitHub Advisory DB, OpenSSF, NIST |
+| **Q3** | **Architectural Paradigm Shifts** | Emerging architectural consensus (e.g. Server Components, Islands, edge execution, local-first). | Engineering blogs, RFCs, TC39 |
+| **Q4** | **Benchmark Reproduction & Fact-Checks** | Dual-reproduction empirical verification of vendor speed, latency, or throughput claims. | Independent benchmark harness, dual test runs |
+| **Q5** | **Deprecation Critical Path** | Runtimes and protocols entering end-of-life status requiring proactive migration plans. | Node.js LTS, Python PEPs, Browser vendors |
+| **Q6** | **Tooling Production Readiness** | Bundlers, test frameworks, and engines reaching enterprise production maturity thresholds. | Production telemetry, adoption metrics |
+| **Q7** | **Regulatory, Compliance & Licensing** | License changes (e.g. Redis/HashiCorp shifts), EU AI Act rules, and privacy compliance. | Legal filings, SPDX updates, Open Source OSI |
+| **Q8** | **Contested Community Debates** | Areas lacking industry consensus with objective analysis of both perspectives. | RFC discourse, GitHub Discussions, HN |
+| **Q9** | **Actionable Stack Recommendations** | Specific, high-impact actions engineering leads should execute for their active stack today. | Synthesized domain analysis & telemetry |
+
+---
+
+## 📊 AI Ecosystem Intelligence & Dual-Reproduction Benchmarks
+
+To eliminate marketing distortion and vendor bias in the artificial intelligence sector, Kenora includes a dedicated **AI Benchmark Dual-Reproduction Protocol**:
+
+* **Independent Dual Reproduction**: All published vendor benchmark numbers (e.g. MMLU, HumanEval, SWE-bench, inference tokens/sec, TTFT) are independently executed across two isolated environments.
+* **Divergence Quantification**: If independent results differ from marketing claims by $> \pm 3.5\%$, the claim is flagged as `CONTESTED` or `REFUTED` with divergence delta ($\Delta\%$) clearly annotated.
+* **Hardware & Cost Normalization**: Benchmarks report inference throughput per dollar and watt, rather than raw unconstrained peak throughput.
+
+---
+
+## 🛡️ 100% Non-Functional Requirements (NFR) Engineering Rigor
+
+### 1. Zero-Trust Multi-Tenancy & Cryptographic Audit Ledger
+* **Context Isolation via `node:async_hooks`**:
+  All operations execute within an immutable `TenantContext` bounded to the asynchronous call tree. `TenantContext.getTenantId()` is enforced at the service boundary.
+* **SHA-256 Merkle Block Hash-Chaining**:
+  Every sensitive mutation produces a cryptographic audit block in `CryptographicAuditLedger`. Blocks are sequentially chained from Genesis ($H_0$) to the current Tip:
+  $$H_i = \text{SHA256}\left(i \;\|\; H_{i-1} \;\|\; \text{timestamp} \;\|\; \text{tenantId} \;\|\; \text{eventType} \;\|\; \text{payloadHash}\right)$$
+  Tampering with any historical block breaks the cryptographic chain and triggers an alert via `GET /api/v1/audit-logs/integrity`.
+
+### 2. Secret & PII Sanitization Redactor
+* **Automated Data Scrubbing (`SecretAndPiiRedactor`)**:
+  All ingested content, log streams, and audit payloads pass through deterministic multi-pattern redaction:
+  - AWS Access Keys (`AKIA[0-9A-Z]{16}`) $\to$ `[REDACTED_AWS_KEY]`
+  - GitHub Personal Access Tokens (`ghp_[a-zA-Z0-9]{36}`) $\to$ `[REDACTED_GITHUB_PAT]`
+  - LLM API Keys (`sk-[a-zA-Z0-9_-]{24,}`) $\to$ `[REDACTED_API_KEY]`
+  - RSA/EC Private Key Blocks (`-----BEGIN.*PRIVATE KEY-----`) $\to$ `[REDACTED_PRIVATE_KEY]`
+  - Database Connection Strings (`postgres://user:pass@host...`) $\to$ Credentials masked
+  - Credit Cards (Luhn pattern) & Social Security Numbers (SSN) $\to$ `[REDACTED_PII]`
+
+### 3. Prometheus Observability, Histograms & 99.99% SLA Tracker
+* **OpenMetrics Endpoint (`GET /api/v1/metrics`)**:
+  Exposes standard Prometheus metrics including `kenora_http_requests_total`, `kenora_http_request_duration_seconds` (nanosecond-precision histograms for $p50, p95, p99$), `kenora_knowledge_items_total`, and `kenora_memory_active_keys`.
+* **Rolling 99.99% SLA Availability Tracker (`GET /api/v1/metrics/sla`)**:
+  Continuously monitors probe uptime and error-budget burn rate against the enterprise $99.99\%$ target (max allowed downtime: $4.32\text{ min/month}$).
+
+### 4. High Availability, Circuit Breakers & Graceful Degradation
+* **Circuit Breakers (`CircuitBreaker`)**:
+  Prevents cascading thread exhaustion across external LLM and database connectors through automated transitions across `CLOSED`, `OPEN`, and `HALF_OPEN` states.
+* **Decorrelated Exponential Backoff with Full Random Jitter**:
+  $$t_{\text{sleep}} = \min\left(t_{\text{max}}, \; \text{Uniform}\left(0, \; t_{\text{base}} \cdot 2^{\text{attempt}}\right)\right)$$
+* **3-State Graceful Degradation Manager (`GET /api/v1/metrics/degradation`)**:
+  - `NORMAL_OPERATION`: All services, real-time verification, and background workers healthy.
+  - `DEGRADED_FALLBACK`: Non-critical background ingestion paused; serves cached LPKG and read-only searches.
+  - `EMERGENCY_READ_ONLY`: Core database read-only; LLM inference suspended to preserve core state.
+
+### 5. Openness, Interoperability & Zero Vendor Lock-in
+* **OpenAPI 3.0 / Swagger Interactive Documentation**: Mounted at `/docs`.
+* **RFC 7807 Problem Details**: Standardized machine-readable error communication.
+* **Model Agility**: `ModelGateway` supports seamless switching between Anthropic Claude, OpenAI, Google Gemini, and local open-weight models (Ollama/vLLM) without application code changes.
+* **Storage Independence**: Standard S3-compatible contract running seamlessly across AWS S3, Cloudflare R2, MinIO, or LocalStack.
+
+---
+
+## 📂 Workspace Topology & Package Directory
 
 ```text
 kenora/
 ├── apps/
-│   ├── api/                  # NestJS REST & OpenAPI Platform (Guards, Interceptors, Filters)
-│   │   ├── src/common/       # SessionAuthGuard, PermissionsGuard, RateLimitGuard, TenantContextInterceptor
-│   │   ├── src/modules/      # Auth, Organizations, Sources, Knowledge, Audit, Health
-│   │   └── src/main.ts       # Global pipes, exception filters, interceptors & Swagger
-│   ├── web/                  # Next.js 15 App Router Frontend & Dashboard
-│   │   ├── app/              # Routes, UI layouts, server components
-│   │   └── middleware.ts     # Edge security headers (CSP, HSTS) & session redirects
-│   └── workers/              # Background Worker Daemon
-│       ├── src/processors/   # IngestionProcessor (Tenant-isolated poll, dedup, claims, verify)
-│       └── src/main.ts       # Worker initialization & BullMQ listeners
+│   ├── api/                     # NestJS 10 REST & OpenAPI 3.0 Platform (Port 4000)
+│   │   ├── src/common/          # SessionAuthGuard, PermissionsGuard, RateLimitGuard, TenantContext
+│   │   ├── src/modules/         # Auth, Org, Sources, Knowledge, Intelligence, Audit, Health, Metrics
+│   │   └── src/main.ts          # Global pipes, filters, interceptors, and Swagger setup
+│   ├── web/                     # Next.js 15 App Router Frontend & Dashboard (Port 3000)
+│   │   ├── app/                 # Daily Briefings, LPKG Explorer, AI Benchmarks, 28-Agent Fleet
+│   │   └── middleware.ts        # Edge security headers (CSP, HSTS) & session routing
+│   └── workers/                 # Distributed Background Ingestion Daemon (Port 4001)
+│       ├── src/processors/      # IngestionProcessor (Tenant-isolated poll, dedup, claims, verify)
+│       └── src/main.ts          # Worker initialization & BullMQ listeners
 │
 ├── packages/
-│   ├── api-contracts/        # Shared Zod validation schemas for requests & query parameters
-│   ├── config/               # Zod-validated environment configurations (fail-fast security checks)
-│   ├── database/             # Drizzle ORM PostgreSQL schema (pgvector, RLS, indexes)
-│   ├── domain/               # Core domain entities & repository interface contracts
-│   ├── events/               # Domain event topics & NATS JetStream event definitions
-│   ├── knowledge/            # Pipeline processor: normalization, SHA-256 deduplication, claims
-│   ├── memory/               # Tri-tier memory architecture (working, short-term, long-term, episodic)
-│   ├── observability/        # Pino logger, CorrelationContext (ALS), CircuitBreaker, BackoffRetry
-│   ├── search/               # HybridSearchEngine (lexical BM25, semantic cosine, RRF k=60)
-│   ├── security/             # TenantContext (ALS), AuthorizationService (RBAC), RateLimiter, Hasher
-│   ├── source-adapters/      # SourceAdapterRegistry, GitHubSourceAdapter, GenericWebAdapter
-│   ├── types/                # Canonical TypeScript DTOs, APIResponse<T>, PaginatedResult<T>
-│   ├── verification/         # BayesianVerificationEngine (corroboration, contradiction, trust scores)
-│   └── ai/                   # ModelGateway provider-agnostic LLM & embedding interface
+│   ├── agents/                  # 28-Agent Cluster Fleet topology, cluster coordinator & telemetry
+│   ├── api-contracts/           # Zod validation schemas for all requests, queries, and DTOs
+│   ├── config/                  # Zod-validated environment configurations (fail-fast security)
+│   ├── database/                # Drizzle ORM PostgreSQL schema (pgvector, RLS, indexes)
+│   ├── domain/                  # Pure domain entities, value objects, and repository contracts
+│   ├── events/                  # InMemoryDomainEventBus & NATS JetStream event definitions
+│   ├── knowledge/               # LPKG Graph Engine & Normalized Knowledge Ingestion Protocol (NKIP)
+│   ├── memory/                  # Tri-tier memory architecture (working, episodic, semantic LPKG)
+│   ├── observability/           # Prometheus metrics, nanosecond histograms, SLA tracker, circuit breaker
+│   ├── search/                  # HybridSearchEngine (lexical BM25 + dense semantic cosine + RRF k=60)
+│   ├── security/                # CryptographicAuditLedger (SHA-256), SecretAndPiiRedactor, TenantContext
+│   ├── source-adapters/         # SourceAdapterRegistry, GitHubSourceAdapter, GenericWebAdapter
+│   ├── types/                   # Canonical TypeScript DTOs, APIResponse<T>, PaginatedResult<T>
+│   ├── verification/            # Bayesian Multi-Source Verification Framework (MSVF) & AI Benchmarks
+│   └── ai/                      # ModelGateway provider-agnostic LLM & embedding interface
 │
-├── docs/                     # Architecture Decision Records (ADRs) & Security Specifications
-└── package.json              # Monorepo scripts, Turbo pipeline & shared devDependencies
+├── docs/                        # Architecture Decision Records (ADRs) & Security Specifications
+├── docker-compose.yml           # Local infrastructure stack (Postgres + pgvector, Redis, NATS, MinIO)
+├── turbo.json                   # Turborepo pipeline orchestration
+└── package.json                 # Monorepo scripts and pnpm workspace configuration
 ```
 
 ---
 
-## 📡 Complete API Route & Contract Reference
+## 📡 Complete API Route & Contract Specification
 
-All REST endpoints in `apps/api` are versioned under `/api/v1` and documented interactively via OpenAPI at `http://localhost:4000/docs`.
+All REST endpoints are versioned under `/api/v1` and documented interactively via OpenAPI at `http://localhost:4000/docs`.
 
-| Module | HTTP Method & Route | Auth Guard | Required RBAC | Rate Limit | Primary Request Contract | Primary Success Response |
-| :--- | :--- | :---: | :---: | :---: | :--- | :--- |
-| **Health** | `GET /api/v1/health` | Public | None | None | None | `HealthCheckStatus` |
-| **Health** | `GET /api/v1/health/liveness` | Public | None | None | None | `{ status, uptimeSeconds }` |
-| **Health** | `GET /api/v1/health/readiness` | Public | None | None | None | `{ status, ready, checks }` |
-| **Auth** | `POST /api/v1/auth/register` | Public | None | 5 req / 60s | `RegisterInput` | `APIResponse<AuthSessionDTO>` |
-| **Auth** | `POST /api/v1/auth/login` | Public | None | 5 req / 60s | `LoginInput` | `APIResponse<AuthSessionDTO>` |
-| **Auth** | `GET /api/v1/auth/me` | Bearer Token | Active Session | None | None | `APIResponse<AuthSessionDTO>` |
-| **Auth** | `POST /api/v1/auth/logout` | Bearer Token | Active Session | None | None | `APIResponse<{ message }>` |
-| **Auth** | `POST /api/v1/auth/verify-email` | Public | None | None | `VerifyEmailInput` | `APIResponse<{ message }>` |
-| **Auth** | `POST /api/v1/auth/switch-organization` | Bearer Token | Org Member | None | `SwitchOrgInput` | `APIResponse<AuthSessionDTO>` |
-| **Auth** | `POST /api/v1/auth/change-password` | Bearer Token | Active Session | None | `ChangePasswordInput` | `APIResponse<{ message }>` |
-| **Auth** | `POST /api/v1/auth/forgot-password` | Public | None | 3 req / 60s | `ForgotPasswordInput` | `APIResponse<{ message }>` |
-| **Auth** | `POST /api/v1/auth/reset-password` | Public | None | None | `ResetPasswordInput` | `APIResponse<{ message }>` |
-| **Organizations** | `GET /api/v1/organizations` | Bearer Token | Active Session | None | None | `APIResponse<OrganizationDTO[]>` |
-| **Organizations** | `POST /api/v1/organizations` | Bearer Token | Active Session | None | `CreateOrgInput` | `APIResponse<{ org, membership }>` |
-| **Organizations** | `GET /api/v1/organizations/:id` | Bearer Token | Org Member | None | `:id` param | `APIResponse<OrganizationDTO>` |
-| **Organizations** | `GET /api/v1/organizations/:id/members` | Bearer Token | `member:read` | None | `:id` param | `APIResponse<MembershipDTO[]>` |
-| **Organizations** | `POST /api/v1/organizations/:id/members` | Bearer Token | `member:invite` | None | `:id` param, `InviteMemberInput` | `APIResponse<MembershipDTO>` |
-| **Knowledge** | `GET /api/v1/knowledge` | Bearer Token | Org Member | None | `QueryKnowledgeInput`, `mode` | `APIResponse<PaginatedResult<DTO>>` |
-| **Knowledge** | `POST /api/v1/knowledge/:id/verify` | Bearer Token | `knowledge:update` | None | `:id` param | `APIResponse<VerificationResult>` |
-| **Sources** | `GET /api/v1/sources` | Bearer Token | Org Member | None | None | `APIResponse<SourceDTO[]>` |
-| **Sources** | `POST /api/v1/sources` | Bearer Token | Org Member | None | `CreateSourceInput` | `APIResponse<SourceDTO>` |
-| **Audit** | `GET /api/v1/audit-logs` | Bearer Token | `settings:read` | None | Query options (`eventType`, `page`) | `APIResponse<PaginatedResult<Log>>` |
-
----
-
-## 🚦 Declarative Request Lifecycle & Middleware Pipeline
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Client
-    participant Edge as Next.js Edge Middleware
-    participant Rate as RateLimitGuard
-    participant Auth as SessionAuthGuard
-    participant Tenant as TenantContextInterceptor (ALS)
-    participant RBAC as PermissionsGuard
-    participant Pipe as ValidationPipe
-    participant Ctrl as Controller & Service
-    participant Resp as TransformResponseInterceptor
-
-    Client->>Edge: HTTP Request + Bearer ses_...
-    Edge->>Edge: Inject x-correlation-id & Security Headers (CSP, HSTS)
-    Edge->>Rate: Forward Request
-    Rate->>Rate: Check Sliding-Window (IP / Email Key)
-    Rate->>Auth: Pass
-    Auth->>Auth: Validate ses_... & resolve Active Organization
-    Auth->>Tenant: Pass with request.session & request.activeOrganizationId
-    Tenant->>Tenant: TenantContext.run({ tenantId, userId, correlationId }, ...)
-    Tenant->>RBAC: Pass in Ambient Context
-    RBAC->>RBAC: Validate RolePermissionMatrix against Target Org
-    RBAC->>Pipe: Pass
-    Pipe->>Pipe: Validate & Strip non-whitelisted payload fields via Zod
-    Pipe->>Ctrl: Dispatch to Handler
-    Ctrl->>Ctrl: Execute Business Logic (Database, Verification, RRF Search)
-    Ctrl-->>Resp: Return raw payload or DTO
-    Resp-->>Client: Wrap in standard APIResponse<T> with metadata & 200 OK
-```
+| Domain Module | Method & Route | Auth Guard | Required RBAC | Rate Limit | Primary Contract |
+| :--- | :--- | :---: | :---: | :---: | :--- |
+| **Observability** | `GET /api/v1/metrics` | Public | None | None | Prometheus / OpenMetrics Text Format |
+| **Observability** | `GET /api/v1/metrics/sla` | Public | None | None | `{ availabilityPercentage, targetSla, status }` |
+| **Observability** | `GET /api/v1/metrics/degradation` | Public | None | None | `{ state, activeDegradations, services }` |
+| **Health** | `GET /api/v1/health` | Public | None | None | Deep probe: Postgres, Redis, NATS status |
+| **Health** | `GET /api/v1/health/liveness` | Public | None | None | Process responsiveness & uptime seconds |
+| **Health** | `GET /api/v1/health/readiness` | Public | None | None | Subsystem initialization readiness |
+| **Audit & Trust** | `GET /api/v1/audit-logs/integrity` | Bearer Token | `settings:read` | None | `{ isChainValid, blockCount, tipHash }` |
+| **Audit & Trust** | `GET /api/v1/audit-logs` | Bearer Token | `settings:read` | None | Redacted, paginated immutable audit records |
+| **Intelligence** | `GET /api/v1/intelligence/daily` | Bearer Token | Org Member | None | The 9-Question Daily Decision Matrix |
+| **Intelligence** | `GET /api/v1/intelligence/lpkg` | Bearer Token | Org Member | None | Graph nodes, relations, and evolution timelines |
+| **Intelligence** | `GET /api/v1/intelligence/benchmarks`| Bearer Token | Org Member | None | AI Model Dual-Reproduction Benchmark Records |
+| **Intelligence** | `GET /api/v1/intelligence/agents` | Bearer Token | Org Member | None | Status of the 28-Agent Cluster Fleet |
+| **Auth** | `POST /api/v1/auth/register` | Public | None | 5 req / 60s | Register user and create default organization |
+| **Auth** | `POST /api/v1/auth/login` | Public | None | 5 req / 60s | Authenticate credentials and return session |
+| **Auth** | `GET /api/v1/auth/me` | Bearer Token | Active Session | None | Active user profile and organization list |
+| **Auth** | `POST /api/v1/auth/switch-organization`| Bearer Token | Org Member | None | Switch tenant context and receive updated token |
+| **Organizations** | `GET /api/v1/organizations` | Bearer Token | Active Session | None | Organizations accessible to authenticated user |
+| **Organizations** | `POST /api/v1/organizations` | Bearer Token | Active Session | None | Create tenant organization with OWNER role |
+| **Knowledge** | `GET /api/v1/knowledge` | Bearer Token | Org Member | None | Hybrid RRF Search ($k=60$) & filtered claims |
+| **Knowledge** | `POST /api/v1/knowledge/:id/verify` | Bearer Token | `knowledge:update` | None | Trigger Bayesian corroboration on target item |
+| **Sources** | `GET /api/v1/sources` | Bearer Token | Org Member | None | Ingestion sources and current trust tiers |
+| **Sources** | `POST /api/v1/sources` | Bearer Token | Org Member | None | Register new GitHub, RSS, or Web feed |
 
 ---
 
-## 🛠️ Quickstart & Local Development
+## 🛠️ Local Development & Quickstart
 
 ### Prerequisites
 * **Node.js**: `>= 20.0.0`
-* **Package Manager**: `pnpm >= 9.0.0`
+* **pnpm**: `>= 9.0.0`
 * **Docker & Docker Compose**: For local PostgreSQL (`pgvector`), Redis, and NATS JetStream
 
-### 1. Installation
+### 1. Clone & Install Dependencies
 ```bash
 git clone https://github.com/your-org/kenora.git
 cd kenora
 pnpm install
 ```
 
-### 2. Infrastructure Spin-Up
-Launch local supporting services (Postgres + pgvector, Redis, NATS, MinIO):
+### 2. Boot Local Infrastructure
 ```bash
 docker compose up -d
 ```
+* PostgreSQL + pgvector: `localhost:5432`
+* Redis: `localhost:6379`
+* NATS JetStream: `localhost:4222`
+* MinIO (S3 compatible): `localhost:9000` (Console: `localhost:9001`)
 
-### 3. Database Migration
-Push database schemas and indexes via Drizzle ORM:
+### 3. Initialize Database Schema
 ```bash
 pnpm db:push
 ```
 
-### 4. Running Development Servers
-Start all applications concurrently via Turborepo:
+### 4. Launch Local Development Services
 ```bash
 pnpm dev
 ```
-* **Web Client Dashboard**: `http://localhost:3000`
-* **NestJS REST API Platform**: `http://localhost:4000/api/v1`
-* **Interactive OpenAPI (Swagger) Docs**: `http://localhost:4000/docs`
-* **Worker Ingestion Daemon**: Port `4001`
+* **Web Client Dashboard**: [http://localhost:3000](http://localhost:3000)
+* **NestJS REST API Platform**: [http://localhost:4000/api/v1](http://localhost:4000/api/v1)
+* **Interactive OpenAPI (Swagger) Docs**: [http://localhost:4000/docs](http://localhost:4000/docs)
+* **Prometheus OpenMetrics**: [http://localhost:4000/api/v1/metrics](http://localhost:4000/api/v1/metrics)
 
-### 5. Running Tests & Type Checks
+### 5. Execute Comprehensive Verification Suites
 ```bash
-# Run unit tests across all applications and packages
+# Run all 94 unit & integration tests across 26 suites
 pnpm test
 
-# Run strict TypeScript type verification across workspaces
+# Run strict TypeScript type-checking across all packages
 pnpm type-check
 ```
 
 ---
 
-## 🔒 Configuration & Environment Variables
+## 🚀 Production Deployment Guide: Vercel + Render
 
-Environment variables are validated on boot via **Zod** in [`@kenora/config`](file:///c:/Users/kenenisa/Desktop/about%20kenenisa/My%20pojects/Kenora/packages/config/src/index.ts). If required configuration is missing or insecure, startup fails immediately:
+Kenora is engineered for seamless dual-cloud production deployment:
+* **Frontend Web Application (`apps/web`)** $\to$ **Vercel** (Global Edge CDN, Instant Static Revalidation, Edge Middleware)
+* **Backend Platform API (`apps/api`)** $\to$ **Render Web Service** (High-throughput Node.js runtime, internal private networking)
+* **Background Worker Fleet (`apps/workers`)** $\to$ **Render Background Worker** (Continuous queue processing, zero HTTP exposure)
+* **Managed Database & Cache** $\to$ **Render PostgreSQL with pgvector** and **Render Managed Redis**
 
-| Environment Variable | Default Value | Description | Production Requirement |
-| :--- | :--- | :--- | :--- |
-| `NODE_ENV` | `development` | Runtime environment (`development`, `test`, `production`) | Must be explicitly set |
-| `PORT` | `4000` | HTTP port for NestJS API | Required |
-| `WEB_PORT` | `3000` | Next.js frontend port | Required |
-| `WORKER_PORT` | `4001` | Background worker management port | Required |
-| `DATABASE_URL` | `postgresql://kenora:...@localhost:5432/kenoradb` | PostgreSQL connection string | Production database pool |
-| `REDIS_URL` | `redis://localhost:6379` | Redis cluster or standalone endpoint | High-availability Redis |
-| `NATS_URL` | `nats://localhost:4222` | NATS JetStream event mesh endpoint | Clustered NATS |
-| `JWT_SECRET` | `super-secret-kenora...` | Fallback signing key | **Fails startup in production if default is used** |
-| `S3_ENDPOINT` | `http://localhost:9000` | S3-compatible storage endpoint | MinIO, R2, or AWS S3 |
-| `S3_BUCKET_NAME` | `kenora-artifacts` | Document and artifact bucket name | Required |
+```mermaid
+flowchart LR
+    subgraph VercelCloud ["Vercel Edge Platform"]
+        VercelEdge["Vercel Edge Network"] --> NextWeb["Next.js 15 Web App<br/>(apps/web)"]
+    end
+
+    subgraph RenderCloud ["Render Cloud Environment"]
+        NextWeb -- "HTTPS /api/v1" --> RenderAPI["Render Web Service<br/>(apps/api)"]
+        RenderWorker["Render Background Worker<br/>(apps/workers)"]
+        
+        RenderAPI <--> RenderPG[("Render PostgreSQL 16<br/>+ pgvector")]
+        RenderAPI <--> RenderRedis[("Render Managed Redis<br/>(BullMQ Queues)")]
+        RenderWorker <--> RenderPG
+        RenderWorker <--> RenderRedis
+    end
+```
+
+### Step 1: Deploy PostgreSQL & Redis on Render
+1. Create a new **PostgreSQL** instance on Render:
+   - Name: `kenora-postgres`
+   - Database: `kenoradb`
+   - Extensions: Enable `vector` via `CREATE EXTENSION IF NOT EXISTS vector;`
+2. Create a new **Redis** instance on Render:
+   - Name: `kenora-redis`
+   - Plan: Standard (Persistence enabled)
+
+### Step 2: Deploy Backend API on Render
+1. In Render Dashboard, click **New +** $\to$ **Web Service**.
+2. Connect your Git repository.
+3. Configure the service:
+   - **Name**: `kenora-api`
+   - **Environment**: `Node`
+   - **Root Directory**: Leave blank (uses repo root)
+   - **Build Command**: `pnpm install && pnpm --filter @kenora/api build`
+   - **Start Command**: `node apps/api/dist/main.js`
+   - **Health Check Path**: `/api/v1/health/liveness`
+4. Set Environment Variables:
+   ```env
+   NODE_ENV=production
+   PORT=4000
+   DATABASE_URL=postgresql://user:pass@dpg-xxx:5432/kenoradb
+   REDIS_URL=redis://red-xxx:6379
+   JWT_SECRET=generate_a_64_character_cryptographically_secure_random_string
+   WEB_ORIGIN=https://your-kenora-app.vercel.app
+   ```
+
+### Step 3: Deploy Background Workers on Render
+1. In Render Dashboard, click **New +** $\to$ **Background Worker**.
+2. Configure the worker:
+   - **Name**: `kenora-workers`
+   - **Build Command**: `pnpm install && pnpm --filter @kenora/workers build`
+   - **Start Command**: `node apps/workers/dist/main.js`
+3. Attach the same `DATABASE_URL`, `REDIS_URL`, and `JWT_SECRET` environment variables.
+
+### Step 4: Deploy Frontend on Vercel
+1. In Vercel Dashboard, click **Add New...** $\to$ **Project**.
+2. Import the Git repository.
+3. Configure project settings:
+   - **Framework Preset**: Next.js
+   - **Root Directory**: `apps/web`
+   - **Build Command**: Automatically detected (`turbo run build` or `next build`)
+4. Set Environment Variables:
+   ```env
+   NEXT_PUBLIC_API_URL=https://kenora-api.onrender.com/api/v1
+   NEXTAUTH_URL=https://your-kenora-app.vercel.app
+   NEXTAUTH_SECRET=generate_another_secure_secret_key
+   ```
+5. Click **Deploy**. Vercel will build and route client requests globally with sub-millisecond edge resolution.
 
 ---
 
-## 📜 Kenora Engineering Rules & Invariants
+## 📜 Kenora Architectural Invariants & Engineering Rules
 
-1. **Architecture Fidelity**: Follow established monorepo folder guidelines. No ad-hoc packages without review.
-2. **Strict Multi-Tenancy**: Every database query, worker cycle, and search operation must be scoped to the active tenant via `TenantContext` or explicit foreign key constraints. Never trust raw client `x-tenant-id` headers.
-3. **No Business Logic in Presentation Layers**: Controllers and React components only handle input delegation and UI rendering. Business logic lives strictly in domain services.
-4. **Untrusted Data Boundary**: Treat all scraped external internet content as untrusted. Sanitize using `ExternalDataSanitizer` before passing to LLMs or vector indices.
-5. **Declarative Security**: Use NestJS guards (`SessionAuthGuard`, `PermissionsGuard`, `RateLimitGuard`) and parameter decorators rather than imperative inline token parsing.
-6. **Idempotent Background Jobs**: Background workers must enforce deduplication checks using content hashes before executing expensive pipelines.
-7. **Source-Agnostic Principle**: External platforms (GitHub, RSS, APIs) are data providers, not hardcoded authorities. All content undergoes Bayesian corroboration.
-8. **Structured Logging & Tracing**: Use Pino structured JSON logging with correlation IDs bound to `CorrelationContext`.
-9. **Zero Plaintext Secrets**: Passwords are never stored in plaintext, never logged, and never returned in API response envelopes.
-10. **Standard Error Envelopes**: All API errors must conform to RFC 7807 Problem Details via the global `GlobalExceptionFilter`.
+1. **Architecture Fidelity**: All code additions must respect package boundaries. Domain models live in `@kenora/domain`; verification algorithms live in `@kenora/verification`.
+2. **Strict Multi-Tenant Isolation**: Tenant context must be initialized via `TenantContextInterceptor` using `node:async_hooks`. Never trust client-supplied headers without cryptographic token resolution.
+3. **Cryptographic Ledger Integrity**: All sensitive administrative actions and tenant modifications must append an entry to `CryptographicAuditLedger`.
+4. **Mandatory PII and Secret Scrubbing**: All external internet inputs and internal audit logs must pass through `SecretAndPiiRedactor`.
+5. **Untrusted Data Boundary**: Treat all scraped internet data as hostile. Sanitize before passing to LLM prompts or vector embeddings to prevent indirect prompt injection.
+6. **No Business Logic in Presentation**: Controllers and React components only handle parameter delegation and rendering. Business logic lives in domain services.
+7. **Idempotent Background Ingestion**: All background worker jobs must check deduplication hashes (`sha256`) before initiating expensive pipeline cycles.
+8. **Observability Invariant**: Every HTTP route must be instrumented with nanosecond precision metrics via `MetricsInterceptor`.
+9. **Zero Plaintext Secrets**: Secrets, credentials, and API tokens are never committed, never logged, and never exposed in API responses.
+10. **RFC 7807 Compliance**: Every error response must conform to RFC 7807 Problem Details via the global `GlobalExceptionFilter`.
+
+---
+
+<div align="center">
+
+**Kenora — Transforming Raw Information into Verified Professional Intelligence**  
+*Built for engineering excellence, rigorous verification, and zero cognitive clutter.*
+
+</div>
