@@ -76,4 +76,36 @@ describe("AuditService & Compliance Transparency Ledger", () => {
     expect(logsTenantA.total).toBe(1);
     expect(logsTenantA.data[0].organizationId).toBe("org-tenant-A");
   });
+
+  it("should maintain cryptographic hash-chain integrity across recorded events", () => {
+    auditService.logEvent({
+      eventType: "user.login.success",
+      actorId: "usr-1",
+      outcome: "success",
+    });
+
+    auditService.logEvent({
+      eventType: "user.password.changed",
+      actorId: "usr-1",
+      outcome: "success",
+    });
+
+    const report = auditService.verifyLedgerIntegrity();
+    expect(report.isValid).toBe(true);
+    expect(report.totalRecords).toBe(2);
+    expect(report.rootHash).not.toBe("0".repeat(64));
+  });
+
+  it("should automatically redact secrets in audit metadata", () => {
+    const logged = auditService.logEvent({
+      eventType: "user.login.success",
+      outcome: "success",
+      metadata: {
+        token: "ghp_1234567890abcdef1234567890abcdef1234",
+      },
+    });
+
+    expect(JSON.stringify(logged.metadata)).toContain("[REDACTED_GITHUB_TOKEN]");
+    expect(JSON.stringify(logged.metadata)).not.toContain("ghp_1234567890abcdef");
+  });
 });
