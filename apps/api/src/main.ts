@@ -15,7 +15,12 @@ const logger = createLogger({ serviceName: "kenora-api" });
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { logger: false });
 
-  app.enableCors();
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim())
+      : true,
+    credentials: true,
+  });
   app.setGlobalPrefix("api/v1");
 
   app.useGlobalPipes(

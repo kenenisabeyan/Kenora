@@ -1,0 +1,67 @@
+services:
+  # 1. Kenora NestJS API Platform (Web Service)
+  - type: web
+    name: kenora-api
+    env: node
+    plan: starter
+    region: oregon
+    buildCommand: pnpm install && pnpm --filter @kenora/knowledge build && pnpm --filter @kenora/verification build && pnpm --filter @kenora/search build && pnpm --filter @kenora/observability build && pnpm --filter @kenora/api build
+    startCommand: node apps/api/dist/main.js
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kenora-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: kenora-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: LOG_LEVEL
+        value: info
+      - key: S3_ENDPOINT
+        value: https://s3.us-east-1.amazonaws.com
+      - key: S3_BUCKET_NAME
+        value: kenora-artifacts
+
+  # 2. Kenora Background Worker Subsystem (Background Worker)
+  - type: worker
+    name: kenora-workers
+    env: node
+    plan: starter
+    region: oregon
+    buildCommand: pnpm install && pnpm --filter @kenora/knowledge build && pnpm --filter @kenora/verification build && pnpm --filter @kenora/search build && pnpm --filter @kenora/observability build && pnpm --filter @kenora/workers build
+    startCommand: node apps/workers/dist/main.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kenora-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: kenora-redis
+          property: connectionString
+      - key: LOG_LEVEL
+        value: info
+
+# 3. Managed Persistent Databases on Render
+databases:
+  - name: kenora-postgres
+    plan: starter
+    region: oregon
+    postgresMajorVersion: 16
+    databaseName: kenoradb
+    user: kenora
+
+# 4. Managed Redis on Render (Session & BullMQ Queue Storage)
+# Note: Render Redis can be attached via Dashboard or Blueprints
