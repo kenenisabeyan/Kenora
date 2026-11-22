@@ -315,3 +315,6 @@ export class ExternalDataSanitizer {
     return `<untrusted_external_content>\n${cleanData}\n</untrusted_external_content>`;
   }
 }
+
+export * from "./audit-ledger.js";
+export * from "./secret-redactor.js";
