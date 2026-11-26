@@ -1,553 +1,275 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
+import { AppShell } from "./components/AppShell";
+import {
+  Calendar,
+  Network,
+  ShieldCheck,
+  Cpu,
+  Bot,
+  Activity,
+  FileCheck2,
+  Settings,
+  ArrowRight,
+  Sparkles,
+  CheckCircle2,
+  AlertTriangle,
+  TrendingUp,
+  Layers,
+  Zap,
+  ExternalLink,
+  ShieldAlert,
+} from "lucide-react";
 
-export default function KenoraDashboard() {
-  const [activeTab, setActiveTab] = useState<
-    "briefing" | "graph" | "ai_benchmarks" | "agents"
-  >("briefing");
+export default function KenoraOverviewPage() {
+  const kpis = [
+    { label: "Verified Claims", value: "18,490", delta: "+142 today", icon: ShieldCheck, color: "emerald" },
+    { label: "LPKG Graph Entities", value: "4,120", delta: "+38 paradigms", icon: Network, color: "indigo" },
+    { label: "Dual-Verified Benchmarks", value: "91.4%", delta: "64 models tracked", icon: Cpu, color: "blue" },
+    { label: "Autonomous Agent Fleet", value: "28 / 28", delta: "5 active clusters", icon: Bot, color: "purple" },
+  ];
 
-  // Sample verified intelligence items
-  const keyInsights = [
+  const sections = [
     {
-      id: "ki-1",
+      title: "Daily 9-Question Intelligence Matrix",
+      desc: "Synthesizes today's breaking changes, CVE advisories, paradigm shifts, deprecations, and actionable recommendations.",
+      href: "/daily",
+      icon: Calendar,
+      tag: "Daily Briefing",
+      status: "Fresh Today",
+    },
+    {
+      title: "Living Knowledge Graph (LPKG)",
+      desc: "Temporal entity relations, supersession justifications, and evolution timeline milestones.",
+      href: "/lpkg",
+      icon: Network,
+      tag: "Knowledge Layer",
+      status: "Active Graph",
+    },
+    {
+      title: "Multi-Source Verification (MSVF)",
+      desc: "Bayesian corroboration workbench, evidence source weighting, and three-step precedence adjudication.",
+      href: "/verification",
+      icon: ShieldCheck,
+      tag: "Fact Verification",
+      status: "Bayesian Kernel",
+    },
+    {
+      title: "AI Ecosystem Intelligence",
+      desc: "Independent dual-reproduction benchmark tracking, vendor claim verification, and tokens/$/watt efficiency.",
+      href: "/benchmarks",
+      icon: Cpu,
+      tag: "AI Telemetry",
+      status: "Dual-Reproduction",
+    },
+    {
+      title: "28-Agent Cluster Fleet",
+      desc: "Monitor acquisition, understanding, verification, delivery, and governance agent workloads over NATS.",
+      href: "/agents",
+      icon: Bot,
+      tag: "Multi-Agent Mesh",
+      status: "100% Online",
+    },
+    {
+      title: "Observability & SLA Tracker",
+      desc: "Nanosecond latency histograms, rolling 99.99% SLA availability, circuit breakers, and degradation modes.",
+      href: "/observability",
+      icon: Activity,
+      tag: "Zero Downtime",
+      status: "99.99% Target",
+    },
+    {
+      title: "Cryptographic Audit Ledger",
+      desc: "Immutable SHA-256 block hash-chain explorer with live tamper verification and automated secret redactor.",
+      href: "/audit",
+      icon: FileCheck2,
+      tag: "SOC 2 Compliance",
+      status: "Chain Valid",
+    },
+    {
+      title: "Workspace Administration",
+      desc: "Multi-tenant tenant settings, role-based access control (RBAC), and source adapter feeds.",
+      href: "/settings",
+      icon: Settings,
+      tag: "Governance",
+      status: "RBAC Enforced",
+    },
+  ];
+
+  const latestIntelligence = [
+    {
+      id: "intel-1",
       title: "RFC 9114 HTTP/3 Formal Specification Finalized",
-      tier: "Tier 1 (Official RFC)",
-      confidence: 99,
       category: "Networking / Protocol",
-      url: "https://datatracker.ietf.org/doc/rfc9114/",
-      summary:
-        "IETF finalizes HTTP/3 over QUIC transport. Disregard informal community posts asserting TCP fallback availability.",
-    },
-    {
-      id: "ki-2",
-      title: "CVE-2026-4412 Critical Transport Handshake Vulnerability",
-      tier: "Tier 1 (NVD Advisory)",
-      confidence: 98,
-      category: "Security / Advisory",
-      url: "https://nvd.nist.gov/vuln/detail/CVE-2026-4412",
-      summary:
-        "Buffer overflow in legacy TLS extensions. CVSS 9.8. Patch deployed in runtime minor release.",
-    },
-    {
-      id: "ki-3",
-      title: "Node.js v24 Native Compile Cache & ESM Default Standard",
-      tier: "Tier 1 (Official Release)",
-      confidence: 96,
-      category: "Runtime Architecture",
-      url: "https://nodejs.org/en/blog/release/v24.0.0",
-      summary:
-        "Native compile-cache enabled by default, superseding previous CommonJS guidance.",
-    },
-  ];
-
-  // LPKG Entities
-  const graphEntities = [
-    {
-      id: "ent-1",
-      name: "React Server Components",
-      type: "Framework Paradigm",
-      status: "Active",
-      validFrom: "2023-03-01",
-      supersedes: "Client-Side SPA Data Fetching",
-      reason: "Streaming server component model reduces client JS payload by 65%",
-      confidence: 94,
-    },
-    {
-      id: "ent-2",
-      name: "Node.js Module Standard",
-      type: "Specification",
-      status: "Active",
-      validFrom: "2024-04-24",
-      supersedes: "CommonJS Require Specification",
-      reason: "ESM native support finalized across core standard runtimes",
-      confidence: 98,
-    },
-    {
-      id: "ent-3",
-      name: "QUIC Transport Layer",
-      type: "Standard Protocol",
-      status: "Active",
-      validFrom: "2022-06-01",
-      supersedes: "TCP Head-of-Line Blocking",
-      reason: "Multiplexed stream transport over UDP",
+      tier: "Tier 1 Official RFC",
       confidence: 99,
-    },
-  ];
-
-  // AI Benchmarks
-  const aiBenchmarks = [
-    {
-      model: "Frontier Reasoner v3",
-      benchmark: "SWE-bench Verified",
-      vendorScore: 58.4,
-      reproducedScore: 58.2,
-      auditor: "Stanford CRFM & Berkeley BAIR",
-      status: "Verified by Reproduction",
-      confidence: 95,
-      isDualVerified: true,
+      summary: "IETF finalizes HTTP/3 over QUIC transport. Mandates multiplexed UDP streams and eliminates head-of-line blocking.",
+      url: "https://datatracker.ietf.org/doc/rfc9114/",
     },
     {
-      model: "OmniModal Pro 2.5",
-      benchmark: "MMLU-Pro",
-      vendorScore: 84.1,
-      reproducedScore: 83.9,
-      auditor: "Independent Systems Lab",
-      status: "Verified by Reproduction",
-      confidence: 92,
-      isDualVerified: true,
+      id: "intel-2",
+      title: "CVE-2026-4412 Critical Transport Handshake Vulnerability",
+      category: "Security / Advisory",
+      tier: "Tier 1 NIST NVD",
+      confidence: 98,
+      summary: "Buffer overrun in legacy TLS extension handling. CVSS 9.8. Reverse proxy containers require immediate v2.14.2+ update.",
+      url: "https://nvd.nist.gov/vuln/detail/CVE-2026-4412",
     },
     {
-      model: "HyperFast-Coder 70B",
-      benchmark: "HumanEval",
-      vendorScore: 89.0,
-      reproducedScore: 89.0,
-      auditor: "Awaiting 2nd Laboratory",
-      status: "Provisional (Vendor Reported)",
-      confidence: 68,
-      isDualVerified: false,
-    },
-    {
-      model: "VendorX-Ultra Preview",
-      benchmark: "AgentBench RealWorld",
-      vendorScore: 76.5,
-      reproducedScore: 54.0,
-      auditor: "MIT Decentralized Lab",
-      status: "Disputed (High Variance)",
-      confidence: 35,
-      isDualVerified: false,
-    },
-  ];
-
-  // 28 Agents
-  const agentClusters = [
-    {
-      name: "Acquisition Cluster",
-      count: 6,
-      description: "Autonomous deep-crawlers, RSS monitors, Git watchers, arXiv ingest, CVE advisory trackers.",
-      agents: ["SourceCrawler", "RssFeed", "GitRepoWatcher", "PaperIngest", "CommunityDiscussion", "AdvisoryWatch"],
-    },
-    {
-      name: "Understanding Cluster",
-      count: 6,
-      description: "Named entity extractors, claim parsers, semantic ontology aligners, and vocabulary tuners.",
-      agents: ["EntityExtractor", "ClaimParser", "SemanticAligner", "ContextNormalizer", "TaxonomyClassifier", "VocabularyTuner"],
-    },
-    {
-      name: "Verification Cluster",
-      count: 6,
-      description: "Bayesian corroboration, contradiction detectors, trust scoring, and benchmark auditors.",
-      agents: ["MultiSourceCorroborator", "ContradictionDetector", "SourceTrustScorer", "BenchmarkVerifier", "TemporalValidity", "EvidenceAuditor"],
-    },
-    {
-      name: "Delivery Cluster",
-      count: 5,
-      description: "Daily briefing synthesizers, 9-question analyzers, and intelligent compression engines.",
-      agents: ["DailyBriefingSynthesizer", "NineQuestionAnalyzer", "KnowledgeCompressor", "AlertDispatcher", "WeeklySynthesis"],
-    },
-    {
-      name: "Governance Cluster",
-      count: 5,
-      description: "Bias indexing, cryptographic audit ledger recorders, privacy sanitizers, and license enforcers.",
-      agents: ["BiasDetector", "AuditLedger", "PrivacySanitizer", "DeprecationMonitor", "ComplianceEnforcer"],
+      id: "intel-3",
+      title: "Node.js v24 Native Compile Cache & Default ESM Standard",
+      category: "Runtime Architecture",
+      tier: "Tier 1 Release WG",
+      confidence: 96,
+      summary: "Native compile cache enabled by default. Legacy CommonJS require hooks trigger strict deprecation notices.",
+      url: "https://nodejs.org/en/blog/release/v24.0.0",
     },
   ];
 
   return (
-    <div className="flex flex-col min-h-screen w-full bg-[#090D16] text-slate-100 font-sans">
-      {/* Top Navigation */}
-      <header className="sticky top-0 z-50 bg-[#0B111E]/90 backdrop-blur-md border-b border-slate-800/80 px-8 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/25">
-              K
+    <AppShell>
+      <div className="space-y-8">
+        {/* Hero Section */}
+        <div className="p-8 rounded-2xl bg-gradient-to-r from-indigo-950/60 via-slate-900 to-slate-950 border border-indigo-900/40 relative overflow-hidden">
+          <div className="max-w-3xl space-y-3 relative z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-900/50 border border-indigo-700/60 text-xs font-semibold text-indigo-300">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Kenora Architecture & Vision Whitepaper v3.0</span>
             </div>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl">
+              The AI-Powered Professional Knowledge Infrastructure
+            </h1>
+            <p className="text-sm text-slate-300 leading-relaxed">
+              Continuously turns fragmented multi-source web information into verified, connected, actionable professional intelligence—without requiring practitioners to ask.
+            </p>
+          </div>
+        </div>
+
+        {/* Executive KPIs */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {kpis.map((kpi, i) => {
+            const Icon = kpi.icon;
+            return (
+              <div key={i} className="p-5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2 hover:border-slate-700 transition-colors">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs uppercase font-semibold text-slate-400">{kpi.label}</span>
+                  <div className="p-2 rounded-lg bg-indigo-950/60 border border-indigo-900/50 text-indigo-400">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="text-2xl font-black text-white">{kpi.value}</div>
+                <div className="text-xs text-emerald-400 font-medium flex items-center gap-1">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span>{kpi.delta}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Section Dashboards Navigation Grid */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-extrabold tracking-tight text-white">KENORA</span>
-                <span className="text-xs font-mono uppercase bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded border border-indigo-500/20">
-                  v3.0 Whitepaper
-                </span>
-              </div>
-              <p className="text-xs text-slate-400">
-                The World&apos;s AI-Powered Professional Knowledge Infrastructure
-              </p>
+              <h2 className="text-lg font-bold text-white">Platform Intelligence Dashboards</h2>
+              <p className="text-xs text-slate-400">Direct access to all specialized engines, registries, and operational consoles.</p>
             </div>
           </div>
 
-          {/* Subsystem Health Pills */}
-          <div className="hidden md:flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-slate-300">LPKG & MSVF Active</span>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs">
-              <span className="w-2 h-2 rounded-full bg-indigo-400" />
-              <span className="text-slate-300">28 Agents Fleet</span>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs">
-              <span className="w-2 h-2 rounded-full bg-cyan-400" />
-              <span className="text-slate-300">API Port 4000</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Container */}
-      <main className="max-w-7xl mx-auto w-full px-8 py-8 space-y-8 flex-1">
-        {/* Navigation Tabs */}
-        <div className="flex border-b border-slate-800 space-x-6 text-sm font-medium">
-          <button
-            onClick={() => setActiveTab("briefing")}
-            className={`pb-3 transition-colors border-b-2 ${
-              activeTab === "briefing"
-                ? "border-indigo-500 text-white font-semibold"
-                : "border-transparent text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            Daily Professional Intelligence (9-Questions)
-          </button>
-          <button
-            onClick={() => setActiveTab("graph")}
-            className={`pb-3 transition-colors border-b-2 ${
-              activeTab === "graph"
-                ? "border-indigo-500 text-white font-semibold"
-                : "border-transparent text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            Living Knowledge Graph (LPKG)
-          </button>
-          <button
-            onClick={() => setActiveTab("ai_benchmarks")}
-            className={`pb-3 transition-colors border-b-2 ${
-              activeTab === "ai_benchmarks"
-                ? "border-indigo-500 text-white font-semibold"
-                : "border-transparent text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            AI Ecosystem Benchmarks
-          </button>
-          <button
-            onClick={() => setActiveTab("agents")}
-            className={`pb-3 transition-colors border-b-2 ${
-              activeTab === "agents"
-                ? "border-indigo-500 text-white font-semibold"
-                : "border-transparent text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            28-Agent Cluster Fleet
-          </button>
-        </div>
-
-        {/* TAB 1: DAILY PROFESSIONAL INTELLIGENCE */}
-        {activeTab === "briefing" && (
-          <div className="space-y-6">
-            {/* Executive Headline & Compression Ratio */}
-            <div className="p-6 bg-gradient-to-r from-slate-900 to-[#121929] border border-slate-800 rounded-2xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <div className="text-xs font-semibold text-indigo-400 tracking-wider uppercase mb-1">
-                  Verified Executive Briefing
-                </div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">
-                  Daily Professional Intelligence Report
-                </h2>
-                <p className="text-xs text-slate-400 mt-1">
-                  Synthesized via Multi-Source Verification Framework (MSVF) & Intelligent Knowledge Compression (IKC)
-                </p>
-              </div>
-              <div className="bg-slate-950/80 border border-slate-800 px-4 py-3 rounded-xl flex items-center gap-4">
-                <div className="text-right">
-                  <div className="text-xs text-slate-400">Distillation Ratio</div>
-                  <div className="text-sm font-bold text-emerald-400">
-                    99.2% Noise Eliminated
-                  </div>
-                </div>
-                <div className="h-8 w-px bg-slate-800" />
-                <div>
-                  <div className="text-xs text-slate-400">Distilled Items</div>
-                  <div className="text-sm font-bold text-indigo-400">
-                    3 High-Impact Signals
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 9-Question Decision Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div className="p-5 bg-slate-900/90 border border-slate-800/80 rounded-xl space-y-2">
-                <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
-                  <span className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">1</span>
-                  What Changed?
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  RFC 9114 finalized HTTP/3 over QUIC transport. CVE-2026-4412 patched buffer overflow in cryptographic handshakes. Node.js v24 standardized compile-cache.
-                </p>
-              </div>
-
-              <div className="p-5 bg-slate-900/90 border border-slate-800/80 rounded-xl space-y-2">
-                <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
-                  <span className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">2</span>
-                  Why It Matters?
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Direct impact on latency SLAs and supply chain integrity. Unverified benchmark claims risk costly architecture misinvestments.
-                </p>
-              </div>
-
-              <div className="p-5 bg-slate-900/90 border border-slate-800/80 rounded-xl space-y-2">
-                <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
-                  <span className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">3</span>
-                  Who Is Affected?
-                </div>
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {["Distributed Architects", "Staff Backend Engineers", "Security Officers", "Platform Leads"].map(
-                    (role) => (
-                      <span key={role} className="text-[11px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
-                        {role}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {sections.map((sec, i) => {
+              const Icon = sec.icon;
+              return (
+                <Link
+                  key={i}
+                  href={sec.href}
+                  className="group p-5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/70 hover:bg-slate-900 transition-all duration-200 flex flex-col justify-between space-y-4"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="p-2.5 rounded-lg bg-indigo-950/60 border border-indigo-800/60 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700/60">
+                        {sec.status}
                       </span>
-                    ),
-                  )}
-                </div>
-              </div>
-
-              <div className="p-5 bg-slate-900/90 border border-slate-800/80 rounded-xl space-y-2">
-                <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
-                  <span className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">4</span>
-                  Confidence & Evidence
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-lg font-bold text-emerald-400">98% Avg</span>
-                  <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">
-                    Tier 1 Official Standard
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  Backed by cryptographic provenance and primary source RFC links.
-                </p>
-              </div>
-
-              <div className="p-5 bg-slate-900/90 border border-slate-800/80 rounded-xl space-y-2">
-                <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs uppercase tracking-wider">
-                  <span className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center text-[10px]">5</span>
-                  Recommended Action
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed font-medium">
-                  Update edge TLS termination configs to isolate unpatched ciphers. Pin dependency lockfiles against advisory CVE-2026-4412.
-                </p>
-              </div>
-
-              <div className="p-5 bg-slate-900/90 border border-slate-800/80 rounded-xl space-y-2">
-                <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
-                  <span className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">6</span>
-                  What to Learn?
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Adopt temporal graph structures (LPKG) and understand dual-reproduction benchmark requirements for AI agent evaluations.
-                </p>
-              </div>
-
-              <div className="p-5 bg-slate-900/90 border border-slate-800/80 rounded-xl space-y-2">
-                <div className="flex items-center gap-2 text-rose-400 font-semibold text-xs uppercase tracking-wider">
-                  <span className="w-5 h-5 rounded-full bg-rose-500/20 flex items-center justify-center text-[10px]">7</span>
-                  What to Ignore?
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Ignore single-vendor synthetic benchmark marketing without dual reproduction. Filter out unverified social media deprecation rumors.
-                </p>
-              </div>
-
-              <div className="p-5 bg-slate-900/90 border border-slate-800/80 rounded-xl space-y-2">
-                <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
-                  <span className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">8</span>
-                  Emerging Trends
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Decisive shift toward zero-copy temporal serialization and independent reproduction verification layers in AI infrastructure.
-                </p>
-              </div>
-
-              <div className="p-5 bg-slate-900/90 border border-slate-800/80 rounded-xl space-y-2">
-                <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs uppercase tracking-wider">
-                  <span className="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px]">9</span>
-                  Forecast (60 Days)
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Standards bodies are projected to enforce dual-lab verification on all generative reasoning benchmarks before RFC adoption.
-                </p>
-              </div>
-            </div>
-
-            {/* Key Verified Intelligence Stream */}
-            <div className="p-6 bg-slate-900 border border-slate-800 rounded-xl space-y-4">
-              <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
-                Distilled Intelligence Signals
-              </h3>
-              <div className="divide-y divide-slate-800">
-                {keyInsights.map((item) => (
-                  <div key={item.id} className="py-4 first:pt-0 last:pb-0 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-white hover:text-indigo-400 transition-colors">
-                          {item.title}
-                        </span>
-                        <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded border border-indigo-500/20">
-                          {item.tier}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-400">{item.summary}</p>
                     </div>
-                    <div className="flex items-center gap-4 shrink-0">
-                      <div className="text-right">
-                        <div className="text-xs font-mono text-emerald-400 font-bold">{item.confidence}% Conf.</div>
-                        <div className="text-[10px] text-slate-500">Bayesian MSVF</div>
-                      </div>
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded transition-colors"
-                      >
-                        Evidence ↗
-                      </a>
+                    <div>
+                      <h3 className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">
+                        {sec.title}
+                      </h3>
+                      <p className="text-xs text-slate-400 mt-1 line-clamp-3 leading-relaxed">
+                        {sec.desc}
+                      </p>
                     </div>
                   </div>
-                ))}
+
+                  <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-semibold text-indigo-400 group-hover:text-indigo-300">
+                    <span>Open Dashboard</span>
+                    <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Latest Verified Intelligence Stream */}
+        <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                Latest Primary Verified Intelligence
+              </h2>
+              <p className="text-xs text-slate-400">Traceable primary evidence chains scored by MSVF.</p>
+            </div>
+            <Link
+              href="/daily"
+              className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1"
+            >
+              <span>View 9-Question Matrix</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {latestIntelligence.map((item) => (
+              <div
+                key={item.id}
+                className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-white text-sm">{item.title}</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-800">
+                      {item.tier}
+                    </span>
+                  </div>
+                  <p className="text-slate-400">{item.summary}</p>
+                </div>
+
+                <div className="flex items-center gap-3 shrink-0">
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-500 uppercase block">Confidence</span>
+                    <span className="font-bold text-emerald-400">{item.confidence}%</span>
+                  </div>
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-2 rounded bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
-        )}
-
-        {/* TAB 2: LIVING PROFESSIONAL KNOWLEDGE GRAPH (LPKG) */}
-        {activeTab === "graph" && (
-          <div className="space-y-6">
-            <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl space-y-2">
-              <h2 className="text-xl font-bold text-white">Living Professional Knowledge Graph (LPKG)</h2>
-              <p className="text-xs text-slate-400">
-                Temporal entity-relation graph featuring non-destructive knowledge evolution, validity intervals, and time-travel querying.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {graphEntities.map((ent) => (
-                <div key={ent.id} className="p-5 bg-slate-900 border border-slate-800 rounded-xl space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono uppercase bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded border border-indigo-500/20">
-                      {ent.type}
-                    </span>
-                    <span className="text-xs font-mono text-emerald-400">{ent.confidence}% Confidence</span>
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-white">{ent.name}</h3>
-                    <div className="text-[11px] text-slate-400 font-mono mt-1">Valid From: {ent.validFrom}</div>
-                  </div>
-                  <div className="pt-2 border-t border-slate-800/80 space-y-1">
-                    <div className="text-[11px] text-amber-400 font-medium">Supersedes: {ent.supersedes}</div>
-                    <p className="text-xs text-slate-400 leading-relaxed">{ent.reason}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: AI ECOSYSTEM BENCHMARKS */}
-        {activeTab === "ai_benchmarks" && (
-          <div className="space-y-6">
-            <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl space-y-2">
-              <h2 className="text-xl font-bold text-white">AI Ecosystem Benchmark Reproduction Protocol</h2>
-              <p className="text-xs text-slate-400">
-                Enforcing the Whitepaper mandate: vendor-reported scores remain capped at provisional confidence until confirmed by at least two independent research laboratories.
-              </p>
-            </div>
-
-            <div className="overflow-hidden border border-slate-800 rounded-xl bg-slate-900">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-950/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
-                  <tr>
-                    <th className="px-5 py-3">Foundation Model</th>
-                    <th className="px-5 py-3">Benchmark</th>
-                    <th className="px-5 py-3">Vendor Score</th>
-                    <th className="px-5 py-3">Reproduced Score</th>
-                    <th className="px-5 py-3">Auditing Labs</th>
-                    <th className="px-5 py-3">Verification Status</th>
-                    <th className="px-5 py-3 text-right">Confidence</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800 text-slate-300">
-                  {aiBenchmarks.map((b, idx) => (
-                    <tr key={idx} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="px-5 py-4 font-semibold text-white">{b.model}</td>
-                      <td className="px-5 py-4 font-mono text-indigo-400">{b.benchmark}</td>
-                      <td className="px-5 py-4 font-mono">{b.vendorScore}%</td>
-                      <td className="px-5 py-4 font-mono font-bold">{b.reproducedScore}%</td>
-                      <td className="px-5 py-4 text-slate-400">{b.auditor}</td>
-                      <td className="px-5 py-4">
-                        <span
-                          className={`text-[10px] px-2 py-0.5 rounded border ${
-                            b.isDualVerified
-                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                              : b.status.includes("Disputed")
-                              ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                              : "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                          }`}
-                        >
-                          {b.status}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4 text-right font-mono font-bold">
-                        <span className={b.confidence >= 90 ? "text-emerald-400" : "text-amber-400"}>
-                          {b.confidence}%
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 4: 28-AGENT CLUSTER ARCHITECTURE */}
-        {activeTab === "agents" && (
-          <div className="space-y-6">
-            <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl space-y-2">
-              <h2 className="text-xl font-bold text-white">Kenora 28-Agent Autonomous Cluster Architecture</h2>
-              <p className="text-xs text-slate-400">
-                Five coordinated clusters executing acquisition, understanding, verification, delivery, and governance in real-time.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {agentClusters.map((cluster) => (
-                <div key={cluster.name} className="p-5 bg-slate-900 border border-slate-800 rounded-xl space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-white">{cluster.name}</h3>
-                    <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded border border-indigo-500/20 font-mono">
-                      {cluster.count} Agents Active
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400">{cluster.description}</p>
-                  <div className="flex flex-wrap gap-1.5 pt-2 border-t border-slate-800">
-                    {cluster.agents.map((agent) => (
-                      <span
-                        key={agent}
-                        className="text-[11px] font-mono bg-slate-800/80 hover:bg-slate-800 text-slate-300 px-2 py-1 rounded"
-                      >
-                        {agent}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 py-6 px-8 text-center text-xs text-slate-500">
-        Kenora © 2026 · Living Professional Knowledge Infrastructure · Multi-Source Verification Framework (MSVF) · All Rights Reserved
-      </footer>
-    </div>
+        </div>
+      </div>
+    </AppShell>
   );
 }
