@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Calendar,
@@ -13,6 +13,7 @@ import {
   Activity,
   FileCheck2,
   Settings,
+  Search,
   ExternalLink,
   ChevronDown,
   Building2,
@@ -26,8 +27,19 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [currentOrg, setCurrentOrg] = useState("Acme Corp Engineering");
   const [isOrgDropdownOpen, setIsOrgDropdownOpen] = useState(false);
+  const [headerSearch, setHeaderSearch] = useState("");
+
+  const handleHeaderSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (headerSearch.trim()) {
+      router.push(`/search?q=${encodeURIComponent(headerSearch.trim())}`);
+    } else {
+      router.push("/search");
+    }
+  };
 
   const navItems = [
     {
@@ -35,6 +47,12 @@ export function AppShell({ children }: AppShellProps) {
       href: "/",
       icon: LayoutDashboard,
       badge: null,
+    },
+    {
+      label: "Hybrid Search",
+      href: "/search",
+      icon: Search,
+      badge: "RRF k=60",
     },
     {
       label: "Daily Intelligence",
@@ -189,7 +207,7 @@ export function AppShell({ children }: AppShellProps) {
         </nav>
 
         {/* System Health Indicators */}
-        <div className="p-3 border-t border-slate-800/80 bg-[#0a0e17] space-y-2">
+        <div className="p-3 border-t border-slate-800/80 bg-[#0a0e18] space-y-2">
           <div className="flex items-center justify-between text-[11px]">
             <span className="text-slate-400 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -215,15 +233,17 @@ export function AppShell({ children }: AppShellProps) {
       <div className="flex-1 flex flex-col pl-64">
         {/* Top Header */}
         <header className="h-16 border-b border-slate-800 bg-[#0d1322]/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Knowledge Intelligence Layer
-            </span>
-            <span className="text-slate-700">|</span>
-            <span className="text-xs text-indigo-400 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5" />
-              Living Professional Knowledge Infrastructure
-            </span>
+          <div className="flex items-center gap-4 flex-1 max-w-xl">
+            <form onSubmit={handleHeaderSearchSubmit} className="relative w-full">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+              <input
+                type="text"
+                placeholder="Search verified knowledge, claims, CVEs, or LPKG nodes (Press Enter)..."
+                value={headerSearch}
+                onChange={(e) => setHeaderSearch(e.target.value)}
+                className="w-full bg-slate-900/90 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              />
+            </form>
           </div>
 
           <div className="flex items-center gap-3">
