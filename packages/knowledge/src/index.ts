@@ -1,5 +1,6 @@
 export * from "./lpkg";
 export * from "./compressor";
+export * from "./ani";
 
 import { KnowledgeItemDTO } from "@kenora/types";
 import crypto from "node:crypto";

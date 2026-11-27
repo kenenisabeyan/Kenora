@@ -3,6 +3,7 @@ import pino, { LoggerOptions } from "pino";
 export * from "./resilience.js";
 export * from "./metrics.js";
 export * from "./degradation.js";
+export * from "./single-flight.js";
 
 export interface LoggerConfig {
   serviceName: string;
