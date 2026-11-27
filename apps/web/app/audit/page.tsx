@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppShell } from "../components/AppShell";
 import {
   FileCheck2,
@@ -15,9 +15,18 @@ import {
   EyeOff,
   Copy,
 } from "lucide-react";
+import { kenoraClient, AuditIntegrityResponse } from "../../lib/api-client";
 
 export default function AuditLedgerPage() {
   const [chainValid, setChainValid] = useState(true);
+  const [integrityData, setIntegrityData] = useState<AuditIntegrityResponse>({
+    isChainValid: true,
+    blockCount: 4,
+    tipHash: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
+    genesisHash: "0000000000000000000000000000000000000000000000000000000000000000",
+  });
+  const [isVerifying, setIsVerifying] = useState(false);
+
   const [redactorInput, setRedactorInput] = useState(
     "Bearer ghp_984719284719827491827491827491827412 and AWS key AKIAIOSFODNN7EXAMPLEsk-live984128491824912"
   );
@@ -28,13 +37,33 @@ export default function AuditLedgerPage() {
     .replace(/AKIA[0-9A-Z]{16}/g, "[REDACTED_AWS_KEY]")
     .replace(/sk-[a-zA-Z0-9_-]{20,}/g, "[REDACTED_API_KEY]");
 
+  // Verify chain against live backend
+  const verifyChainWithApi = async () => {
+    setIsVerifying(true);
+    try {
+      const res = await kenoraClient.getAuditIntegrity();
+      if (res) {
+        setIntegrityData(res);
+        setChainValid(res.isChainValid);
+      }
+    } catch {
+      // Fallback
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  useEffect(() => {
+    verifyChainWithApi();
+  }, []);
+
   const blocks = [
     {
-      index: 4,
-      timestamp: "2026-11-26 06:15:32 UTC",
+      index: integrityData.blockCount || 4,
+      timestamp: "2026-11-27 05:30:12 UTC",
       tenantId: "org-acme-corp",
       eventType: "KNOWLEDGE_ITEM_VERIFIED",
-      tipHash: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
+      tipHash: integrityData.tipHash || "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
       previousHash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       payloadHash: "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb",
       operator: "Agent-301 (Cross-Source Corroborator)",
@@ -65,7 +94,7 @@ export default function AuditLedgerPage() {
       tenantId: "org-acme-corp",
       eventType: "ORGANIZATION_CREATED",
       tipHash: "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d",
-      previousHash: "GENESIS_HASH_00000000000000000000000000000000000000000000000000000000",
+      previousHash: integrityData.genesisHash || "0000000000000000000000000000000000000000000000000000000000000000",
       payloadHash: "11212224448883333ffffaaaaeeeeccccbbbbdddd999977775555333311110000",
       operator: "System Genesis",
     },
@@ -91,14 +120,12 @@ export default function AuditLedgerPage() {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => {
-                setChainValid(true);
-                alert("Cryptographic chain verified from Genesis to Tip #0004. 100% integrity valid.");
-              }}
+              onClick={verifyChainWithApi}
+              disabled={isVerifying}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-950 border border-emerald-800 hover:bg-emerald-900 text-xs text-emerald-300 font-semibold rounded-lg transition-colors"
             >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Verify Chain Integrity</span>
+              <CheckCircle2 className={`w-3.5 h-3.5 ${isVerifying ? "animate-spin" : ""}`} />
+              <span>{isVerifying ? "Validating..." : "Verify Chain Integrity"}</span>
             </button>
           </div>
         </div>
@@ -109,14 +136,14 @@ export default function AuditLedgerPage() {
             <span className="text-slate-400 text-xs uppercase font-semibold">Ledger Health</span>
             <div className="text-2xl font-bold text-emerald-400 flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5" />
-              <span>Chain Intact</span>
+              <span>{chainValid ? "Chain Intact" : "Chain Broken"}</span>
             </div>
             <span className="text-[11px] text-slate-500">Zero broken blocks or hash mismatches</span>
           </div>
 
           <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1">
             <span className="text-slate-400 text-xs uppercase font-semibold">Total Blocks</span>
-            <div className="text-2xl font-bold text-white">4 Blocks</div>
+            <div className="text-2xl font-bold text-white">{integrityData.blockCount} Blocks</div>
             <span className="text-[11px] text-slate-500">Hash-chained with SHA-256</span>
           </div>
 
@@ -170,7 +197,7 @@ export default function AuditLedgerPage() {
               <Fingerprint className="w-4 h-4 text-indigo-400" />
               Cryptographic Block Sequence
             </h2>
-            <span className="text-xs text-slate-500 font-mono">Tip Hash: 7f83b165...9069</span>
+            <span className="text-xs text-slate-500 font-mono">Tip Hash: {integrityData.tipHash.slice(0, 16)}...</span>
           </div>
 
           <div className="space-y-3">

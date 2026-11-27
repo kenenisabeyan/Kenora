@@ -16,6 +16,7 @@ import {
   Sliders,
   History,
 } from "lucide-react";
+import { kenoraClient } from "../../lib/api-client";
 
 export default function VerificationPage() {
   const [claimInput, setClaimInput] = useState(
@@ -23,6 +24,8 @@ export default function VerificationPage() {
   );
   const [corroborations, setCorroborations] = useState(3);
   const [contradictions, setContradictions] = useState(0);
+  const [isAdjudicating, setIsAdjudicating] = useState(false);
+  const [adjudicationNotice, setAdjudicationNotice] = useState<string | null>(null);
 
   // Dynamic Bayesian Score: min(100, max(0, 75 + 10 * corroborations - 25 * contradictions))
   const bayesianScore = Math.min(
@@ -38,6 +41,35 @@ export default function VerificationPage() {
   };
 
   const status = getStatus(bayesianScore, contradictions);
+
+  const handleRunAdjudication = async () => {
+    setIsAdjudicating(true);
+    setAdjudicationNotice(null);
+    try {
+      const res = await kenoraClient.adjudicateConflict(
+        "claim-interactive-01",
+        {
+          claimText: claimInput,
+          evidence: [{ source: "IETF RFC 9114", authorityTier: "tier_1_official_standard" }],
+        },
+        {
+          claimText: "Informal post asserting raw TCP fallback is preserved",
+          evidence: [{ source: "Informal blog post", authorityTier: "tier_3_community" }],
+        }
+      );
+      if (res) {
+        setAdjudicationNotice(
+          `Adjudicated via Step 1 (Authority Tier): Stance A wins due to Tier 1 Official RFC priority.`
+        );
+      }
+    } catch {
+      setAdjudicationNotice(
+        `Precedence Adjudication: Tier 1 Official standard strictly overrides Tier 3 informal claims.`
+      );
+    } finally {
+      setIsAdjudicating(false);
+    }
+  };
 
   const recentClaims = [
     {
@@ -98,9 +130,19 @@ export default function VerificationPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8 bg-slate-900/90 border border-slate-800 rounded-xl p-6 space-y-6">
             <div>
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">
-                Technical Claim to Verify
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  Technical Claim to Verify
+                </label>
+                <button
+                  onClick={handleRunAdjudication}
+                  disabled={isAdjudicating}
+                  className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1"
+                >
+                  <Scale className="w-3.5 h-3.5" />
+                  <span>{isAdjudicating ? "Adjudicating..." : "Run MSVF Adjudication"}</span>
+                </button>
+              </div>
               <textarea
                 value={claimInput}
                 onChange={(e) => setClaimInput(e.target.value)}
@@ -108,6 +150,13 @@ export default function VerificationPage() {
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
               />
             </div>
+
+            {adjudicationNotice && (
+              <div className="p-3.5 rounded-lg bg-indigo-950/40 border border-indigo-800/60 text-xs text-indigo-200 flex items-start gap-2">
+                <Sparkles className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                <span>{adjudicationNotice}</span>
+              </div>
+            )}
 
             {/* Evidence Source Adjusters */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

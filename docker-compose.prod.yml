@@ -1,0 +1,134 @@
+version: "3.9"
+
+services:
+  # --- Core Relational & Vector Persistence ---
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: kenora-postgres-prod
+    restart: always
+    environment:
+      POSTGRES_USER: kenora
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-kenora_production_secure_pass_9921}
+      POSTGRES_DB: kenoradb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kenora -d kenoradb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kenora-network
+
+  # --- Cache & Distributed Queue Broker ---
+  redis:
+    image: redis:7-alpine
+    container_name: kenora-redis-prod
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata_prod:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kenora-network
+
+  # --- Event Mesh Backbone ---
+  nats:
+    image: nats:2.10-alpine
+    container_name: kenora-nats-prod
+    restart: always
+    command: ["-js", "-m", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/varz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kenora-network
+
+  # --- NestJS Platform API Gateway ---
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: kenora-api-prod
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://kenora:${DB_PASSWORD:-kenora_production_secure_pass_9921}@postgres:5432/kenoradb
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+      JWT_SECRET: ${JWT_SECRET:-kenora_production_jwt_secret_must_be_set_in_env_file_64_chars}
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - kenora-network
+
+  # --- Next.js 15 Web Application Console ---
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: kenora-web-prod
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://api:4000/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - kenora-network
+
+  # --- Distributed Background Worker Fleet ---
+  workers:
+    build:
+      context: .
+      dockerfile: apps/workers/Dockerfile
+    container_name: kenora-workers-prod
+    restart: always
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://kenora:${DB_PASSWORD:-kenora_production_secure_pass_9921}@postgres:5432/kenoradb
+      REDIS_URL: redis://redis:6379
+      NATS_URL: nats://nats:4222
+      JWT_SECRET: ${JWT_SECRET:-kenora_production_jwt_secret_must_be_set_in_env_file_64_chars}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - kenora-network
+
+volumes:
+  pgdata_prod:
+  redisdata_prod:
+
+networks:
+  kenora-network:
+    driver: bridge

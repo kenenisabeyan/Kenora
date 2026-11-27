@@ -8,7 +8,7 @@ on:
 
 jobs:
   validate:
-    name: Build, Lint & Type-Check
+    name: Build, Type-Check & Comprehensive Vitest Suites
     runs-on: ubuntu-latest
 
     steps:
@@ -42,11 +42,14 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile=false
 
-      - name: Type Check
+      - name: Type Check Workspaces
         run: pnpm run type-check
 
-      - name: Lint
+      - name: Run Full Vitest Test Suites (26 Suites · 94 Tests)
+        run: pnpm exec vitest run
+
+      - name: Lint Codebase
         run: pnpm run lint
 
-      - name: Build All Packages & Apps
+      - name: Build All Monorepo Applications & Packages
         run: pnpm run build
