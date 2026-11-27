@@ -403,13 +403,14 @@ The `@kenora/search` package implements enterprise hybrid retrieval combining le
 
 ## 🛡️ 9. 100% Non-Functional Requirements (NFR) Engineering Rigor
 
-### 9.1 Zero-Trust Multi-Tenancy & Cryptographic Audit Ledger
+### 9.1 Zero-Trust Multi-Tenancy & Cryptographic Merkle Proof Tree
 * **Context Isolation via `node:async_hooks`**:
   All asynchronous promise chains execute within an immutable `TenantContext` bounded to the thread's execution tree. Cross-tenant data leakage is structurally impossible.
 * **SHA-256 Merkle Block Hash-Chaining**:
   Every sensitive mutation produces a cryptographic audit block in `CryptographicAuditLedger`. Blocks are chained sequentially from Genesis ($H_0$) to the current Tip:
   $$H_i = \text{SHA256}\left(i \;\|\; H_{i-1} \;\|\; \text{timestamp} \;\|\; \text{tenantId} \;\|\; \text{eventType} \;\|\; \text{payloadHash}\right)$$
-  Tampering with any historical block breaks the cryptographic chain and triggers an alert via `GET /api/v1/audit-logs/integrity`.
+* **Logarithmic $O(\log N)$ Cryptographic Inclusion Proofs (`MerkleTreeEngine`)**:
+  Third-party auditors (SOC 2, ISO 27001) can mathematically verify the presence and sequence of any audit log entry against the root hash without disclosing confidential tenant payload contents via `verifyProof(leaf, proof, root)`.
 
 ### 9.2 Automated Secret & PII Sanitization Redactor
 * **Deterministic Regex & Heuristic Scrubbing (`SecretAndPiiRedactor`)**:
@@ -417,27 +418,53 @@ The `@kenora/search` package implements enterprise hybrid retrieval combining le
   - AWS Access Keys (`AKIA[0-9A-Z]{16}`) $\to$ `[REDACTED_AWS_KEY]`
   - GitHub Personal Access Tokens (`ghp_[a-zA-Z0-9]{36}`) $\to$ `[REDACTED_GITHUB_PAT]`
   - LLM API Keys (`sk-[a-zA-Z0-9_-]{20,}`) $\to$ `[REDACTED_API_KEY]`
-  - RSA / EC Private Keys (`-----BEGIN.*PRIVATE KEY-----`) $\to$ `[REDACTED_PRIVATE_KEY]`
+  - Google Cloud / RSA / EC Private Keys (`-----BEGIN.*PRIVATE KEY-----`) $\to$ `[REDACTED_PRIVATE_KEY]`
   - Database Connection Strings (`postgres://user:pass@host...`) $\to$ Credentials masked
   - Credit Cards (Luhn pattern) & Social Security Numbers (SSN) $\to$ `[REDACTED_PII]`
 
-### 9.3 Prometheus Observability, Histograms & 99.99% SLA Tracker
-* **OpenMetrics Endpoint (`GET /api/v1/metrics`)**:
-  Exposes standard Prometheus metrics: `kenora_http_requests_total`, `kenora_http_request_duration_seconds` (nanosecond-precision histograms for $p50, p95, p99$ measured via `process.hrtime.bigint()`), `kenora_knowledge_items_total`, and `kenora_memory_active_keys`.
-* **Rolling 99.99% SLA Availability Tracker (`GET /api/v1/metrics/sla`)**:
-  Continuously monitors uptime and error-budget burn rate against the enterprise $99.99\%$ target (max allowed downtime: $4.32\text{ min/month}$).
+### 9.3 AI Safety & Adversarial Prompt Injection Defense (PromptShield)
+* **Direct & Indirect Injection Mitigation (`AISafetyShield`)**:
+  Evaluates raw feeds, community discourse, and agent inputs against adversarial jailbreak signatures, system prompt override attempts, and exfiltration probes (`ignore previous instructions`, `DAN persona`, `reveal system prompt`).
+* **Cross-Site Scripting (XSS) Sanitization**:
+  Extracts and neutralizes malicious `<script>` blocks and dangerous pseudo-protocols (`javascript:`) before content enters agent context.
+* **Perimeter Quarantine & Dead Letter Queue (DLQ)**:
+  Inputs scoring $\ge 80$ risk points are rejected with `AI_SAFETY_VIOLATION`. The background worker processor quarantines suspicious items into a Dead Letter Queue (DLQ) state before claims extraction.
 
-### 9.4 High Availability, Circuit Breakers & Graceful Degradation
+### 9.4 High-Throughput Thread-Safe LRU Cache & Latency SLA Percentile Monitor
+* **Constant-Time $O(1)$ LRU Cache with TTL (`LRUCache`)**:
+  Thread-safe in-memory cache with eviction and configurable TTL. Accelerates high-frequency graph lookups and verification queries down to sub-millisecond latencies while tracking real-time hit/miss ratios.
+* **Production Latency SLA Percentile Monitor (`SLAMonitor`)**:
+  Continuously samples request latencies and measures compliance against Kenora Whitepaper Targets:
+  - **$P_{50} \le 45\text{ms}$** (Target: $< 45\text{ms}$)
+  - **$P_{95} \le 180\text{ms}$** (Target: $< 180\text{ms}$)
+  - **$P_{99} \le 450\text{ms}$** (Target: $< 450\text{ms}$)
+  - **Maximum Error Tolerance $\le 0.01\%$**
+  - Generates compliance reports (`compliant`, `degraded`, `breached`) with diagnostic violation reasons.
+
+### 9.5 High Availability, Circuit Breakers, SingleFlight Coalescing & Graceful Degradation
 * **Distributed Circuit Breakers (`CircuitBreaker`)**:
   Protects external database pools and LLM gateways through automated transitions across `CLOSED`, `OPEN`, and `HALF_OPEN` states.
+* **SingleFlight Coalescing Engine (`SingleFlight`)**:
+  Coalesces concurrent identical asynchronous requests to eliminate cache stampedes and downstream thread exhaustion under peak load.
 * **Decorrelated Exponential Backoff with Full Random Jitter**:
   $$t_{\text{sleep}} = \min\left(t_{\text{max}}, \; \text{Uniform}\left(0, \; t_{\text{base}} \cdot 2^{\text{attempt}}\right)\right)$$
-* **3-State Graceful Degradation Manager (`GET /api/v1/metrics/degradation`)**:
-  - `NORMAL_OPERATION`: All services active: real-time LLM inference, continuous ingestion, background workers.
-  - `DEGRADED_FALLBACK`: Non-critical background ingestion paused; serves cached LPKG graph and cached search results.
-  - `EMERGENCY_READ_ONLY`: Core database read-only; LLM inference suspended to preserve core state.
+* **4-Level Graceful Degradation Manager (`GET /api/v1/metrics/degradation`)**:
+  - `L0 (Full Service)`: Normal operation across all real-time inference and ingestion flows.
+  - `L1 (Stale Cached Fallback)`: Upstream dependency degraded; serves high-confidence cached responses.
+  - `L2 (Read-Only Emergency Mode)`: Database writes disabled; graph reads preserved.
+  - `L3 (Static Core Fallback)`: Total upstream failure; static architectural invariants served.
 
-### 9.5 Openness, Interoperability & Zero Vendor Lock-in
+### 9.6 Enterprise Defense Security Headers & HTTP Middleware
+All incoming API requests pass through strict enterprise defense headers in `apps/api/src/main.ts`:
+- `X-Content-Type-Options: nosniff` (MIME sniffing prevention)
+- `X-Frame-Options: DENY` (Clickjacking mitigation)
+- `X-XSS-Protection: 1; mode=block`
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload` (Enforces HTTPS)
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: geolocation=(), microphone=(), camera=()`
+- `X-Powered-By: Kenora-Infrastructure-v3.0`
+
+### 9.7 Openness, Interoperability & Zero Vendor Lock-in
 * **OpenAPI 3.0 / Swagger Interactive Documentation**: Mounted at `/docs`.
 * **RFC 7807 Problem Details**: Standardized machine-readable error communication.
 * **Model Agility**: `ModelGateway` supports seamless switching between Anthropic Claude, OpenAI, Google Gemini, and local models (Ollama/vLLM) without application code changes.
@@ -467,6 +494,19 @@ All 10 specialized dashboards are live, accessible, and verified:
 │  /settings             Workspace Administration, RBAC & Ingestion Feed Sources         │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+### Dashboard Capabilities & User Experience Overview
+
+1. **Executive Command Center (`/`)**: Real-time KPI telemetry (28 agents online, 99.99% SLA, Merkle root hash tip, verified claims volume) and direct jump cards to all platform subsystems.
+2. **Hybrid Precision Retrieval (`/search`)**: Interactive reciprocal rank fusion search engine combining sparse lexical BM25 matching ($0.35$ weight) with 1536-dimensional dense cosine semantic retrieval ($0.65$ weight) over smoothing constant $k=60$.
+3. **Daily Professional Intelligence (`/daily`)**: Synthesizes the morning executive briefing answering the **9-Question Professional Decision Framework** (What Changed, Why It Matters, Who Is Affected, Confidence & Traceable Evidence, Recommended Action, What to Learn, What to Unlearn, Upstream Sources, and What to Monitor).
+4. **Living Professional Knowledge Graph (`/lpkg`)**: Interactive temporal paradigm explorer mapping technology evolution timelines, ancestor supersession lineages, **Blast Radius Downstream Analysis (Agent AG-405)** across $1$, $2$, and $3$ hops, and live **DAG Invariant Verification (0 Cycles)**.
+5. **Bayesian Verification Workbench (`/verification`)**: Interactive claim adjudicator displaying corroborating sources ($\mathcal{S}^+$), contradicting sources ($\mathcal{S}^-$), posterior confidence curves, and the deterministic 3-Step Precedence adjudication trace.
+6. **AI Ecosystem Intelligence (`/benchmarks`)**: Foundation model leaderboard with dual-reproduction verification status, divergence delta ($\Delta\% \le 3.5\%$), benchmark gaming detection, and tokens/dollar and watt/inference efficiency normalizations.
+7. **28-Agent Autonomous Cluster Fleet (`/agents`)**: Real-time swarm coordinator and status telemetry across the Acquisition, Understanding, Verification, Delivery, and Governance clusters.
+8. **Prometheus Observability & SLA Tracker (`/observability`)**: Nanosecond-precision latency distribution ($P_{50}, P_{90}, P_{95}, P_{99}$), error-budget burn rate, OpenMetrics stream exporter, and interactive 4-Level Graceful Degradation Simulator ($L_0$ to $L_3$).
+9. **Cryptographic Audit Trail (`/audit`)**: Immutable SHA-256 hash-chained block ledger inspector with $O(\log N)$ Merkle Inclusion Proof generator and automated Secret/PII Redactor testing workbench.
+10. **Workspace Administration & RBAC (`/settings`)**: Multi-tenant organization boundaries, role-based access control assignments (`OWNER`, `ADMIN`, `MEMBER`, `AUDITOR`), and external ingestion feed registrations.
 
 ---
 
@@ -534,6 +574,9 @@ All REST endpoints are versioned under `/api/v1` and documented interactively vi
 | **Intelligence** | `GET /api/v1/intelligence/graph/snapshot` | Bearer Token | Org Member | None | LPKG Snapshot as of timestamp (`asOf`) |
 | **Intelligence** | `POST /api/v1/intelligence/graph/entity` | Bearer Token | `knowledge:create` | None | Create temporal entity in LPKG |
 | **Intelligence** | `POST /api/v1/intelligence/graph/entity/:id/supersede` | Bearer Token | `knowledge:update` | None | Supersede entity non-destructively |
+| **Intelligence** | `GET /api/v1/intelligence/graph/entity/:id/lineage` | Bearer Token | Org Member | None | Complete temporal supersession lineage |
+| **Intelligence** | `GET /api/v1/intelligence/graph/entity/:id/blast-radius` | Bearer Token | Org Member | None | Downstream blast radius BFS traversal |
+| **Intelligence** | `GET /api/v1/intelligence/graph/audit/cycles` | Bearer Token | Org Member | None | DAG invariant verification (0 circular cycles) |
 | **Intelligence** | `POST /api/v1/intelligence/conflicts/adjudicate` | Bearer Token | Org Member | None | 3-Step Precedence conflict resolution |
 | **Intelligence** | `POST /api/v1/intelligence/ai-benchmarks/verify` | Bearer Token | `knowledge:create` | None | Verify model claim via dual reproduction |
 | **Intelligence** | `GET /api/v1/intelligence/agents/status` | Bearer Token | `agent:read` | None | Telemetry of the 28-Agent Cluster Fleet |
