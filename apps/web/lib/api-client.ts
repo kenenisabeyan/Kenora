@@ -109,6 +109,18 @@ export class KenoraApiClient {
     return this.request(`/intelligence/graph/snapshot${query}`);
   }
 
+  async getEntityLineage(entityId: string): Promise<any> {
+    return this.request(`/intelligence/graph/entity/${entityId}/lineage`);
+  }
+
+  async calculateBlastRadius(entityId: string, maxDepth: number = 3): Promise<any> {
+    return this.request(`/intelligence/graph/entity/${entityId}/blast-radius?maxDepth=${maxDepth}`);
+  }
+
+  async auditGraphCycles(): Promise<any> {
+    return this.request("/intelligence/graph/audit/cycles");
+  }
+
   async getAgentsStatus(): Promise<any> {
     return this.request("/intelligence/agents/status");
   }

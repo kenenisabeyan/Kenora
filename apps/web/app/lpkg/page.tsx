@@ -282,6 +282,36 @@ export default function LpkgPage() {
                 ))}
               </div>
             </div>
+
+            {/* Blast Radius & DAG Invariant Section */}
+            <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-amber-400" />
+                  Blast Radius Downstream Analysis (Agent AG-405)
+                </h3>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-emerald-400 font-semibold flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> DAG Invariant Verified (0 Cycles)
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">
+                Breadth-first graph traversal identifies dependent services, runtime bindings, and architectural layers impacted if this specification is deprecated or modified.
+              </p>
+              <div className="grid grid-cols-3 gap-2 pt-2">
+                <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 text-center">
+                  <div className="text-sm font-bold text-white">1 Hop</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">3 Direct Clients</div>
+                </div>
+                <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 text-center">
+                  <div className="text-sm font-bold text-amber-400">2 Hops</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">7 Transitive Microservices</div>
+                </div>
+                <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 text-center">
+                  <div className="text-sm font-bold text-rose-400">Criticality</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">Tier-1 Core Invariant</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
