@@ -17,7 +17,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%20%2B%20pgvector-4169E1.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://github.com/pgvector/pgvector)
 [![Redis](https://img.shields.io/badge/Redis-7%20%2B%20BullMQ-DC382D.svg?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
 [![NATS](https://img.shields.io/badge/NATS-JetStream%20Mesh-27AAE1.svg?style=for-the-badge&logo=nats.io&logoColor=white)](https://nats.io/)
-[![Vitest](https://img.shields.io/badge/Vitest-94%2F94%20Tests%20Passed-6E9F18.svg?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Vitest](https://img.shields.io/badge/Vitest-115%2F115%20Tests%20Passed-6E9F18.svg?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Prometheus](https://img.shields.io/badge/Prometheus-OpenMetrics-E6522C.svg?style=for-the-badge&logo=prometheus&logoColor=white)](https://prometheus.io/)
 [![Dual-Cloud](https://img.shields.io/badge/Dual--Cloud-Vercel%20%2B%20Render-4F46E5.svg?style=for-the-badge&logo=vercel&logoColor=white)](#-dual-cloud-production-deployment-vercel--render)
 
@@ -25,7 +25,7 @@
 
 | Enterprise Availability SLA | Cryptographic Ledger Tip | Active Autonomous Mesh | Hybrid Search Latency (p95) | Test Verification Suite |
 | :---: | :---: | :---: | :---: | :---: |
-| **99.99% Target · 100% Rolling** | **SHA-256 Merkle Chained** | **28 / 28 Agents Online** | **< 20ms (RRF k=60)** | **26 Suites · 94 / 94 Passed** |
+| **99.99% Target · 100% Rolling** | **SHA-256 Merkle Chained** | **28 / 28 Agents Online** | **< 20ms (RRF k=60)** | **33 Suites · 115 / 115 Passed** |
 
 <br/>
 
@@ -46,11 +46,13 @@
 7. [AI Ecosystem Intelligence & Dual-Reproduction Benchmarks](#-7-ai-ecosystem-intelligence--dual-reproduction-benchmarks)
 8. [Multi-Modal Hybrid Precision Search (RRF $k=60$)](#-8-multi-modal-hybrid-precision-search-rrf-k60)
 9. [100% Non-Functional Requirements (NFR) Engineering Rigor](#-9-100-non-functional-requirements-nfr-engineering-rigor)
-   - [Zero-Trust Multi-Tenancy & Cryptographic Audit Ledger](#91-zero-trust-multi-tenancy--cryptographic-audit-ledger)
+   - [Zero-Trust Multi-Tenancy & Cryptographic Merkle Proof Tree](#91-zero-trust-multi-tenancy--cryptographic-merkle-proof-tree)
    - [Automated Secret & PII Sanitization Redactor](#92-automated-secret--pii-sanitization-redactor)
-   - [Prometheus Observability, Histograms & 99.99% SLA Tracker](#93-prometheus-observability-histograms--9999-sla-tracker)
-   - [High Availability, Circuit Breakers & Graceful Degradation](#94-high-availability-circuit-breakers--graceful-degradation)
-   - [Openness, Interoperability & Zero Vendor Lock-in](#95-openness-interoperability--zero-vendor-lock-in)
+   - [AI Safety & Adversarial Prompt Injection Defense (PromptShield)](#93-ai-safety--adversarial-prompt-injection-defense-promptshield)
+   - [High-Throughput Thread-Safe LRU Cache & Latency SLA Percentile Monitor](#94-high-throughput-thread-safe-lru-cache--latency-sla-percentile-monitor)
+   - [High Availability, Circuit Breakers, SingleFlight Coalescing & Graceful Degradation](#95-high-availability-circuit-breakers-singleflight-coalescing--graceful-degradation)
+   - [Enterprise Defense Security Headers & HTTP Middleware](#96-enterprise-defense-security-headers--http-middleware)
+   - [Openness, Interoperability & Zero Vendor Lock-in](#97-openness-interoperability--zero-vendor-lock-in)
 10. [Web Frontend & Live Dashboard Ecosystem](#-10-web-frontend--live-dashboard-ecosystem)
 11. [Workspace Topology & Package Directory](#-11-workspace-topology--package-directory)
 12. [Complete REST API Route & Contract Specification](#-12-complete-rest-api-route--contract-specification)
@@ -179,16 +181,16 @@ The foundation of Kenora rests upon ten proprietary technologies designed specif
 
 | ID | Technology | Core Mechanism | Mathematical Formulation / Invariant |
 | :-: | :--- | :--- | :--- |
-| **LPKG** | **Living Professional Knowledge Graph** | Temporal graph representing evolving concepts, tools, patterns, and runtimes. Non-destructive versioning; entities archive into evolution timelines rather than deleting. | $G = (V, E, T)$ where $v \in V$ defines validity interval $[t_{\text{start}}, t_{\text{end}})$. Supersedes edges link newer paradigms to predecessors. |
-| **MSVF** | **Multi-Source Verification Framework** | Bayesian cross-source corroboration engine. Evaluates corroborating sources ($\mathcal{S}^+$) against contradicting sources ($\mathcal{S}^-$) with three-step precedence adjudication. | $\text{Confidence} = \min(100, \max(0, 75 + 10\|\mathcal{S}^+\| - 25\|\mathcal{S}^-\|))$. Precedence: Authority Tier $\to$ Recency $\to$ Contested. |
-| **NKIP** | **Normalized Knowledge Ingestion Protocol** | Canonical ingestion contract converting unstructured changelogs, RFC specs, CVE advisories, and technical discourse into normalized claim triples. | Invariant: Every item decomposed into $(S, P, O)$ triples with source authority tier ($T_1, T_2, T_3$) and timestamp metadata. |
-| **DTS** | **Dynamic Trust Scoring** | Time-decaying source reputation system. Calibrates source trust scores according to empirical accuracy, verified correction frequency, and historical consistency. | $T(s, t) = T_0(s) \cdot e^{-\lambda(t - t_0)} + \sum_i \alpha \cdot \text{Accuracy}_i$. Penalizes inaccurate feeds dynamically. |
+| **LPKG** | **Living Professional Knowledge Graph** | Temporal graph representing evolving concepts, tools, patterns, and runtimes. Non-destructive versioning; entities archive into evolution timelines. Features BFS **Blast Radius Analysis** (downstream service impact) and strict **DAG Invariant Cycle Detection**. | $G = (V, E, T)$ where $v \in V$ defines validity interval $[t_{\text{start}}, t_{\text{end}})$. Supersedes edges link newer paradigms to predecessors. $O(V + E)$ cycle-free DAG audit. |
+| **MSVF** | **Multi-Source Verification Framework** | Bayesian cross-source corroboration engine. Evaluates corroborating sources ($\mathcal{S}^+$) against contradicting sources ($\mathcal{S}^-$) with a deterministic 3-step precedence policy. | $\text{Confidence} = \min(100, \max(0, 75 + 10\|\mathcal{S}^+\| - 25\|\mathcal{S}^-\|))$. 3-Step Precedence: Authority Tier ($T_1 \to T_4$) $\to$ Recency $\to$ Explicit Unresolved Conflict. |
+| **NKIP** | **Normalized Knowledge Ingestion Protocol** | Canonical ingestion contract converting unstructured changelogs, RFC specs, CVE advisories, and technical discourse into normalized claim triples with AI Safety perimeter screening. | Invariant: Every item decomposed into $(S, P, O)$ triples with source authority tier ($T_1, T_2, T_3, T_4$), immutable content SHA-256 hash, and prompt injection defense. |
+| **DTS** | **Dynamic Trust Scoring** | Time-decaying source reliability calibration. Calibrates source trust scores according to exponential half-life decay and empirical refutation deductions. | $T(s, t) = T_0(s) \cdot e^{-\lambda(t - t_0)} + \Delta_{\text{accuracy}}(s)$. With $\lambda = \frac{\ln(2)}{90\text{ days}}$, blending 70% empirical accuracy and penalizing refuted claims. |
 | **KCE** | **Knowledge Compounding Engine** | Synthesizes verified atomic claims into higher-order conceptual knowledge. Identifies cross-domain architectural paradigm shifts. | Aggregates sub-graph density and clustering coefficients to surface emerging standards before mainstream consensus. |
 | **ANI** | **Autonomous Noise Identification** | Real-time heuristic and semantic filter rejecting promotional marketing, superficial listicles, low-substance churn, and synthetic spam prior to ingestion. | Classifies raw web content using semantic entropy and citation depth; filters $> 70\%$ of raw noise at the edge. |
 | **IKC** | **Institutional Knowledge Connectors** | High-fidelity connectors to foundational authorities (W3C, TC39, IETF, ISO, NIST, OpenSSF, GitHub Advisory DB, ArXiv) with Tier-1 authority precedence. | Strict webhook / polling adapters with cryptographic payload signature validation ($HMAC\text{-SHA256}$). |
 | **ECN** | **Epistemic Confidence Networks** | Explicit quantification of uncertainty across all claims. Labels knowledge as `VERIFIED`, `PROVISIONAL`, `CONTESTED`, or `REFUTED` with numeric confidence vectors. | Calibrated confidence interval $[c_{\text{min}}, c_{\text{max}}]$ reflecting source consensus and sample size. |
 | **PKI** | **Professional Knowledge Interfaces** | Zero-clutter, high-signal presentation interfaces structured around the 9-Question Daily Decision Matrix, interactive LPKG visualization, and proactive alerts. | Eliminates feed algorithms; designed for rapid disengagement with maximum knowledge gained per minute. |
-| **XAI** | **Explainable AI & Provenance Tracing** | Strict evidence traceability. Every claim is linked to immutable source snapshots, citation chains, contradiction logs, and model reasoning steps. | Invariant: Zero unsupported assertions. Every output links directly to primary sources with immutable citation hashes. |
+| **XAI** | **Explainable AI & Cryptographic Merkle Provenance** | Strict evidence traceability. Every claim is linked to immutable source snapshots, citation chains, and verifiable SHA-256 Merkle Proof inclusion branches. | Invariant: Zero unsupported assertions. Every output links directly to primary sources with immutable citation hashes and $O(\log N)$ Merkle proofs. |
 
 ---
 
