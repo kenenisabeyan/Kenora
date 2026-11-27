@@ -31,7 +31,7 @@ export interface BlastRadiusImpactResult {
 export interface ILPKGStore {
   createEntity(
     tenantId: string,
-    entity: Omit<LPKGEntity, "id" | "createdAt" | "updatedAt">,
+    entity: Omit<LPKGEntity, "id" | "createdAt" | "updatedAt" | "tenantId">,
   ): Promise<LPKGEntity>;
   
   supersedeEntity(
@@ -43,7 +43,7 @@ export interface ILPKGStore {
 
   createRelation(
     tenantId: string,
-    relation: Omit<LPKGRelation, "id" | "createdAt">,
+    relation: Omit<LPKGRelation, "id" | "createdAt" | "tenantId">,
   ): Promise<LPKGRelation>;
 
   getSnapshot(tenantId: string, asOfTimestamp?: string): Promise<LPKGGraphSnapshot>;
@@ -73,7 +73,7 @@ export class InMemoryLPKGStore implements ILPKGStore {
 
   async createEntity(
     tenantId: string,
-    entityInput: Omit<LPKGEntity, "id" | "createdAt" | "updatedAt">,
+    entityInput: Omit<LPKGEntity, "id" | "createdAt" | "updatedAt" | "tenantId">,
   ): Promise<LPKGEntity> {
     const id = `lpkg-ent-${crypto.randomUUID()}`;
     const now = new Date().toISOString();
@@ -182,7 +182,7 @@ export class InMemoryLPKGStore implements ILPKGStore {
 
   async createRelation(
     tenantId: string,
-    relationInput: Omit<LPKGRelation, "id" | "createdAt">,
+    relationInput: Omit<LPKGRelation, "id" | "createdAt" | "tenantId">,
   ): Promise<LPKGRelation> {
     const id = `lpkg-rel-${crypto.randomUUID()}`;
     const now = new Date().toISOString();
