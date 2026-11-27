@@ -1,5 +1,6 @@
 export * from "./msvf";
 export * from "./ai-benchmark";
+export * from "./dts";
 
 /**
  * Verification Engine & Policy Contracts

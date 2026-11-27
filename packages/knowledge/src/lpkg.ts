@@ -9,9 +9,24 @@ import {
 import crypto from "node:crypto";
 
 /**
+ * Blast Radius Impact Assessment Result (Empowers AG-405 Code Impact Assessor)
+ */
+export interface BlastRadiusImpactResult {
+  rootEntityId: string;
+  rootEntityName: string;
+  totalAffectedEntities: number;
+  affectedEntities: Array<{
+    entityId: string;
+    entityName: string;
+    depth: number;
+    relationType: string;
+  }>;
+}
+
+/**
  * Living Professional Knowledge Graph (LPKG) Store
  * Provides temporal entity-relation storage, evolution tracking,
- * and time-travel snapshot querying without destructive overwrites.
+ * time-travel snapshot querying, and advanced graph algorithms.
  */
 export interface ILPKGStore {
   createEntity(
@@ -39,6 +54,16 @@ export interface ILPKGStore {
   ): Promise<KnowledgeEvolutionTimeline>;
 
   findEntityByName(tenantId: string, name: string): Promise<LPKGEntity | null>;
+
+  getSupersessionLineage(tenantId: string, entityId: string): Promise<LPKGEntity[]>;
+
+  calculateBlastRadius(
+    tenantId: string,
+    entityId: string,
+    maxDepth?: number,
+  ): Promise<BlastRadiusImpactResult>;
+
+  detectSupersessionCycles(tenantId: string): Promise<{ hasCycle: boolean; cyclePath?: string[] }>;
 }
 
 export class InMemoryLPKGStore implements ILPKGStore {
@@ -104,29 +129,27 @@ export class InMemoryLPKGStore implements ILPKGStore {
     };
     this.entities.set(existingEntityId, supersededEntity);
 
-    // Create the updated entity record linked to the previous
-    const updatedEntityId = `lpkg-ent-${crypto.randomUUID()}`;
+    // Create the updated entity as a new generation or updated version
+    const newEntityId = `lpkg-ent-${crypto.randomUUID()}`;
     const updatedEntity: LPKGEntity = {
       ...previous,
       ...updatedData,
-      id: updatedEntityId,
-      tenantId,
+      id: newEntityId,
       status: "active",
       validityInterval: {
         validFrom: now,
-        validTo: undefined,
       },
       createdAt: now,
       updatedAt: now,
     };
-    this.entities.set(updatedEntityId, updatedEntity);
+    this.entities.set(newEntityId, updatedEntity);
 
-    // Record relation that updatedEntity supersedes supersededEntity
+    // Create automatic supersedes relation
     const relationId = `lpkg-rel-${crypto.randomUUID()}`;
     const supersedesRelation: LPKGRelation = {
       id: relationId,
       tenantId,
-      sourceEntityId: updatedEntityId,
+      sourceEntityId: newEntityId,
       targetEntityId: existingEntityId,
       relationType: "supersedes",
       validityInterval: { validFrom: now },
@@ -137,23 +160,22 @@ export class InMemoryLPKGStore implements ILPKGStore {
     };
     this.relations.set(relationId, supersedesRelation);
 
-    // Update timeline
+    // Append to evolution timeline
     const timeline = this.timelines.get(existingEntityId) || {
       entityId: existingEntityId,
       tenantId,
       versions: [],
     };
 
-    const nextVersionNumber = timeline.versions.length + 1;
+    const nextVersionNum = timeline.versions.length + 1;
     timeline.versions.push({
-      version: nextVersionNumber,
+      version: nextVersionNum,
       timestamp: now,
+      supersededByEntityId: newEntityId,
+      reason,
       data: { ...updatedEntity },
-      supersededBy: updatedEntityId,
-      supersedingReason: reason,
     });
     this.timelines.set(existingEntityId, timeline);
-    this.timelines.set(updatedEntityId, timeline);
 
     return { previousEntity: supersededEntity, updatedEntity };
   }
@@ -176,42 +198,27 @@ export class InMemoryLPKGStore implements ILPKGStore {
     return relation;
   }
 
-  async getSnapshot(
-    tenantId: string,
-    asOfTimestamp?: string,
-  ): Promise<LPKGGraphSnapshot> {
-    const targetTime = asOfTimestamp ? new Date(asOfTimestamp).getTime() : Date.now();
-    const activeEntities: LPKGEntity[] = [];
-    const activeRelations: LPKGRelation[] = [];
+  async getSnapshot(tenantId: string, asOfTimestamp?: string): Promise<LPKGGraphSnapshot> {
+    const targetDate = asOfTimestamp ? new Date(asOfTimestamp) : new Date();
 
-    for (const entity of this.entities.values()) {
-      if (entity.tenantId !== tenantId) continue;
-      const validFrom = new Date(entity.validityInterval.validFrom).getTime();
-      const validTo = entity.validityInterval.validTo
-        ? new Date(entity.validityInterval.validTo).getTime()
-        : Infinity;
+    const activeEntities = Array.from(this.entities.values()).filter((e) => {
+      if (e.tenantId !== tenantId) return false;
+      const validFrom = new Date(e.validityInterval.validFrom);
+      const validTo = e.validityInterval.validTo ? new Date(e.validityInterval.validTo) : null;
+      return validFrom <= targetDate && (!validTo || targetDate < validTo);
+    });
 
-      if (validFrom <= targetTime && targetTime < validTo) {
-        activeEntities.push(entity);
-      }
-    }
-
-    for (const relation of this.relations.values()) {
-      if (relation.tenantId !== tenantId) continue;
-      const validFrom = new Date(relation.validityInterval.validFrom).getTime();
-      const validTo = relation.validityInterval.validTo
-        ? new Date(relation.validityInterval.validTo).getTime()
-        : Infinity;
-
-      if (validFrom <= targetTime && targetTime < validTo) {
-        activeRelations.push(relation);
-      }
-    }
+    const activeRelations = Array.from(this.relations.values()).filter((r) => {
+      if (r.tenantId !== tenantId) return false;
+      const validFrom = new Date(r.validityInterval.validFrom);
+      const validTo = r.validityInterval.validTo ? new Date(r.validityInterval.validTo) : null;
+      return validFrom <= targetDate && (!validTo || targetDate < validTo);
+    });
 
     return {
+      asOfTimestamp: targetDate.toISOString(),
       entities: activeEntities,
       relations: activeRelations,
-      asOfTimestamp: asOfTimestamp || new Date().toISOString(),
     };
   }
 
@@ -221,22 +228,145 @@ export class InMemoryLPKGStore implements ILPKGStore {
   ): Promise<KnowledgeEvolutionTimeline> {
     const timeline = this.timelines.get(entityId);
     if (!timeline || timeline.tenantId !== tenantId) {
-      return {
-        entityId,
-        tenantId,
-        versions: [],
-      };
+      throw new Error(`Timeline for entity '${entityId}' not found for tenant '${tenantId}'`);
     }
     return timeline;
   }
 
   async findEntityByName(tenantId: string, name: string): Promise<LPKGEntity | null> {
-    const lower = name.toLowerCase();
     for (const entity of this.entities.values()) {
-      if (entity.tenantId === tenantId && entity.name.toLowerCase() === lower && entity.status === "active") {
+      if (entity.tenantId === tenantId && entity.name.toLowerCase() === name.toLowerCase()) {
         return entity;
       }
     }
     return null;
+  }
+
+  /**
+   * Traces the linear and branched supersession ancestry of an entity
+   */
+  async getSupersessionLineage(tenantId: string, entityId: string): Promise<LPKGEntity[]> {
+    const lineage: LPKGEntity[] = [];
+    let currentId: string | undefined = entityId;
+    const visited = new Set<string>();
+
+    while (currentId && !visited.has(currentId)) {
+      visited.add(currentId);
+      const entity = this.entities.get(currentId);
+      if (!entity || entity.tenantId !== tenantId) break;
+      lineage.push(entity);
+
+      // Find relation where currentId is the target of a "supersedes" relation
+      const supersedingRel = Array.from(this.relations.values()).find(
+        (r) => r.tenantId === tenantId && r.targetEntityId === currentId && r.relationType === "supersedes",
+      );
+
+      currentId = supersedingRel?.sourceEntityId;
+    }
+
+    return lineage;
+  }
+
+  /**
+   * Calculates blast radius / downstream dependencies using BFS graph traversal
+   * (Directly empowers AG-405 Code Impact Assessor)
+   */
+  async calculateBlastRadius(
+    tenantId: string,
+    entityId: string,
+    maxDepth: number = 3,
+  ): Promise<BlastRadiusImpactResult> {
+    const root = this.entities.get(entityId);
+    if (!root || root.tenantId !== tenantId) {
+      throw new Error(`Root entity '${entityId}' not found`);
+    }
+
+    const affected: BlastRadiusImpactResult["affectedEntities"] = [];
+    const visited = new Set<string>([entityId]);
+    const queue: Array<{ id: string; depth: number }> = [{ id: entityId, depth: 0 }];
+
+    while (queue.length > 0) {
+      const { id, depth } = queue.shift()!;
+      if (depth >= maxDepth) continue;
+
+      // Find all relations originating from or targeting this entity
+      const connectedRels = Array.from(this.relations.values()).filter(
+        (r) => r.tenantId === tenantId && (r.sourceEntityId === id || r.targetEntityId === id),
+      );
+
+      for (const rel of connectedRels) {
+        const neighborId = rel.sourceEntityId === id ? rel.targetEntityId : rel.sourceEntityId;
+        if (!visited.has(neighborId)) {
+          visited.add(neighborId);
+          const neighborEntity = this.entities.get(neighborId);
+          if (neighborEntity) {
+            affected.push({
+              entityId: neighborEntity.id,
+              entityName: neighborEntity.name,
+              depth: depth + 1,
+              relationType: rel.relationType,
+            });
+            queue.push({ id: neighborId, depth: depth + 1 });
+          }
+        }
+      }
+    }
+
+    return {
+      rootEntityId: entityId,
+      rootEntityName: root.name,
+      totalAffectedEntities: affected.length,
+      affectedEntities: affected,
+    };
+  }
+
+  /**
+   * Cycle Detection: Guarantees that supersedes relations never form circular loops
+   */
+  async detectSupersessionCycles(tenantId: string): Promise<{ hasCycle: boolean; cyclePath?: string[] }> {
+    const supersedesRels = Array.from(this.relations.values()).filter(
+      (r) => r.tenantId === tenantId && r.relationType === "supersedes",
+    );
+
+    const adj = new Map<string, string[]>();
+    for (const rel of supersedesRels) {
+      const list = adj.get(rel.sourceEntityId) || [];
+      list.push(rel.targetEntityId);
+      adj.set(rel.sourceEntityId, list);
+    }
+
+    const visited = new Set<string>();
+    const recStack = new Set<string>();
+    const path: string[] = [];
+
+    const dfs = (node: string): boolean => {
+      visited.add(node);
+      recStack.add(node);
+      path.push(node);
+
+      const neighbors = adj.get(node) || [];
+      for (const neighbor of neighbors) {
+        if (!visited.has(neighbor)) {
+          if (dfs(neighbor)) return true;
+        } else if (recStack.has(neighbor)) {
+          path.push(neighbor);
+          return true;
+        }
+      }
+
+      recStack.delete(node);
+      path.pop();
+      return false;
+    };
+
+    for (const node of adj.keys()) {
+      if (!visited.has(node)) {
+        if (dfs(node)) {
+          return { hasCycle: true, cyclePath: path };
+        }
+      }
+    }
+
+    return { hasCycle: false };
   }
 }
