@@ -318,3 +318,4 @@ export class ExternalDataSanitizer {
 
 export * from "./audit-ledger.js";
 export * from "./secret-redactor.js";
+export * from "./merkle-tree.js";
