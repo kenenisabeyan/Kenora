@@ -90,7 +90,7 @@ export class IngestionProcessor {
           normalizedCount++;
 
           // 2. Safety & Prompt Injection Perimeter Scan (NFR Safety)
-          const safetyScan = AISafetyShield.scan(normalized.title + " " + normalized.content);
+          const safetyScan = AISafetyShield.scan(normalized.title + " " + normalized.body);
           if (!safetyScan.isSafe) {
             logger.warn(
               {
