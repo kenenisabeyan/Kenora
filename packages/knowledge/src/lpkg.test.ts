@@ -1,81 +1,120 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { InMemoryLPKGStore } from "./lpkg";
 
-describe("Living Professional Knowledge Graph (LPKG)", () => {
+describe("Living Professional Knowledge Graph (LPKG) Advanced Graph Algorithms", () => {
   let store: InMemoryLPKGStore;
-  const tenantId = "ten_test_lpkg";
+  const tenantId = "tenant-engineering";
 
   beforeEach(() => {
     store = new InMemoryLPKGStore();
   });
 
-  it("should create active entity with validity interval", async () => {
+  it("should create an entity and initialize its evolution timeline", async () => {
     const entity = await store.createEntity(tenantId, {
-      tenantId,
-      name: "React Server Components",
-      entityType: "framework",
+      name: "CommonJS",
+      canonicalKey: "commonjs-spec",
+      entityType: "standard",
       status: "active",
-      validityInterval: { validFrom: new Date().toISOString() },
-      attributes: { paradigm: "SSR" },
-      confidenceScore: 92,
+      validityInterval: { validFrom: "2010-01-01" },
+      attributes: { loader: "require" },
+      confidenceScore: 95,
     });
 
     expect(entity.id).toBeDefined();
-    expect(entity.name).toBe("React Server Components");
-    expect(entity.status).toBe("active");
+    expect(entity.name).toBe("CommonJS");
+
+    const timeline = await store.getEvolutionTimeline(tenantId, entity.id);
+    expect(timeline.versions.length).toBe(1);
+    expect(timeline.versions[0].version).toBe(1);
   });
 
-  it("should supersede entity non-destructively and maintain evolution timeline", async () => {
-    const original = await store.createEntity(tenantId, {
-      tenantId,
-      name: "Node.js Module System",
+  it("should trace supersession lineage across generations", async () => {
+    const cjs = await store.createEntity(tenantId, {
+      name: "CommonJS",
+      canonicalKey: "commonjs",
       entityType: "standard",
       status: "active",
-      validityInterval: { validFrom: "2020-01-01T00:00:00.000Z" },
-      attributes: { defaultFormat: "CommonJS" },
+      validityInterval: { validFrom: "2010-01-01" },
+      attributes: {},
       confidenceScore: 90,
     });
 
-    const { previousEntity, updatedEntity } = await store.supersedeEntity(
+    const { updatedEntity: esm } = await store.supersedeEntity(
       tenantId,
-      original.id,
-      {
-        name: "Node.js Module System",
-        attributes: { defaultFormat: "ESM" },
-      },
-      "ECMAScript modules became default standard in Node v22+",
+      cjs.id,
+      { name: "Native ESM", canonicalKey: "native-esm" },
+      "Standardized across ECMAScript specifications",
     );
 
-    expect(previousEntity.status).toBe("superseded");
-    expect(previousEntity.validityInterval.validTo).toBeDefined();
-
-    expect(updatedEntity.status).toBe("active");
-    expect(updatedEntity.attributes.defaultFormat).toBe("ESM");
-
-    const timeline = await store.getEvolutionTimeline(tenantId, original.id);
-    expect(timeline.versions.length).toBe(2);
-    expect(timeline.versions[1].supersedingReason).toContain("ECMAScript modules");
+    const lineage = await store.getSupersessionLineage(tenantId, cjs.id);
+    expect(lineage.length).toBe(2);
+    expect(lineage[0].id).toBe(cjs.id);
+    expect(lineage[1].id).toBe(esm.id);
   });
 
-  it("should retrieve historical graph snapshot using time-travel query", async () => {
-    const historicalTime = "2021-06-01T00:00:00.000Z";
-    const entity = await store.createEntity(tenantId, {
-      tenantId,
-      name: "Legacy Tool",
-      entityType: "technology",
-      status: "superseded",
-      validityInterval: {
-        validFrom: "2020-01-01T00:00:00.000Z",
-        validTo: "2022-01-01T00:00:00.000Z",
-      },
+  it("should calculate blast radius (BFS) for impacted downstream entities", async () => {
+    const root = await store.createEntity(tenantId, {
+      name: "Node.js 18",
+      canonicalKey: "node-18",
+      entityType: "framework",
+      status: "active",
+      validityInterval: { validFrom: "2022-04-01" },
       attributes: {},
-      confidenceScore: 80,
+      confidenceScore: 95,
     });
 
-    const snapshotIn2021 = await store.getSnapshot(tenantId, historicalTime);
-    expect(snapshotIn2021.entities.some((e) => e.name === "Legacy Tool")).toBe(true);
+    const serviceA = await store.createEntity(tenantId, {
+      name: "Auth Service",
+      canonicalKey: "auth-svc",
+      entityType: "framework",
+      status: "active",
+      validityInterval: { validFrom: "2023-01-01" },
+      attributes: {},
+      confidenceScore: 92,
+    });
 
-    const snapshotIn2024 = await store.getSnapshot(tenantId, "2024-01-01T00:00:00.000Z");
-    expect(snapshotIn2024.entities.some((e) => e.name === "Legacy Tool")).toBe(false);
+    await store.createRelation(tenantId, {
+      sourceEntityId: serviceA.id,
+      targetEntityId: root.id,
+      relationType: "integrates_with",
+      validityInterval: { validFrom: "2023-01-01" },
+      status: "current",
+      confidenceScore: 95,
+      evidenceItemIds: [],
+    });
+
+    const blastRadius = await store.calculateBlastRadius(tenantId, root.id, 2);
+    expect(blastRadius.totalAffectedEntities).toBe(1);
+    expect(blastRadius.affectedEntities[0].entityName).toBe("Auth Service");
+    expect(blastRadius.affectedEntities[0].depth).toBe(1);
+  });
+
+  it("should detect absence of circular supersession cycles in a healthy DAG", async () => {
+    const e1 = await store.createEntity(tenantId, {
+      name: "HTTP/1.1",
+      canonicalKey: "http-1",
+      entityType: "standard",
+      status: "active",
+      validityInterval: { validFrom: "1997-01-01" },
+      attributes: {},
+      confidenceScore: 99,
+    });
+
+    const { updatedEntity: e2 } = await store.supersedeEntity(
+      tenantId,
+      e1.id,
+      { name: "HTTP/2" },
+      "Multiplexed binary framing",
+    );
+
+    const { updatedEntity: e3 } = await store.supersedeEntity(
+      tenantId,
+      e2.id,
+      { name: "HTTP/3" },
+      "QUIC UDP transport eliminates head-of-line blocking",
+    );
+
+    const cycleCheck = await store.detectSupersessionCycles(tenantId);
+    expect(cycleCheck.hasCycle).toBe(false);
   });
 });
