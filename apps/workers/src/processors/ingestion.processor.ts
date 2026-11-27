@@ -1,6 +1,6 @@
 import { SourceAdapterRegistry } from "@kenora/source-adapters";
 import { createLogger } from "@kenora/observability";
-import { TenantContext } from "@kenora/security";
+import { TenantContext, AISafetyShield } from "@kenora/security";
 import { DefaultKnowledgePipelineProcessor, NormalizedItem } from "@kenora/knowledge";
 import { BayesianVerificationEngine } from "@kenora/verification";
 
@@ -20,6 +20,7 @@ export interface IngestionProcessingSummary {
   normalizedCount: number;
   duplicateCount: number;
   verifiedCount: number;
+  quarantinedCount?: number;
 }
 
 export class IngestionProcessor {
@@ -78,6 +79,7 @@ export class IngestionProcessor {
         let normalizedCount = 0;
         let duplicateCount = 0;
         let verifiedCount = 0;
+        let quarantinedCount = 0;
 
         for (const raw of rawItems) {
           // 1. Normalize
@@ -87,7 +89,23 @@ export class IngestionProcessor {
           );
           normalizedCount++;
 
-          // 2. Deduplicate
+          // 2. Safety & Prompt Injection Perimeter Scan (NFR Safety)
+          const safetyScan = AISafetyShield.scan(normalized.title + " " + normalized.content);
+          if (!safetyScan.isSafe) {
+            logger.warn(
+              {
+                itemId: normalized.externalId,
+                threatLevel: safetyScan.threatLevel,
+                riskScore: safetyScan.riskScore,
+                flagged: safetyScan.flaggedPatterns,
+              },
+              "Item rejected and quarantined to DLQ due to AI safety violation",
+            );
+            quarantinedCount++;
+            continue;
+          }
+
+          // 3. Deduplicate
           const dedupCheck = await this.pipelineProcessor.deduplicate(
             normalized,
             activeTenant,
@@ -97,11 +115,11 @@ export class IngestionProcessor {
             continue;
           }
 
-          // 3. Extract Claims & Entities
+          // 4. Extract Claims & Entities
           const claims = await this.pipelineProcessor.extractClaims(normalized);
           const entities = await this.pipelineProcessor.extractEntities(normalized);
 
-          // 4. Verification
+          // 5. Verification
           const verification = await this.verificationEngine.verifyItem(
             normalized.externalId,
             activeTenant,
@@ -138,6 +156,7 @@ export class IngestionProcessor {
           normalizedCount,
           duplicateCount,
           verifiedCount,
+          quarantinedCount,
         };
       },
     );

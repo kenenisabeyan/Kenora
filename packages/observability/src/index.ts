@@ -4,6 +4,8 @@ export * from "./resilience.js";
 export * from "./metrics.js";
 export * from "./degradation.js";
 export * from "./single-flight.js";
+export * from "./cache.js";
+export * from "./sla-monitor.js";
 
 export interface LoggerConfig {
   serviceName: string;

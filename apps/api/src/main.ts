@@ -22,6 +22,19 @@ async function bootstrap() {
       : true,
     credentials: true,
   });
+
+  // Enterprise Security Headers Middleware
+  app.use((req: any, res: any, next: any) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("X-XSS-Protection", "1; mode=block");
+    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+    res.setHeader("X-Powered-By", "Kenora-Infrastructure-v3.0");
+    next();
+  });
+
   app.setGlobalPrefix("api/v1");
 
   app.useGlobalPipes(
