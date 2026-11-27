@@ -74,6 +74,7 @@ describe("Living Professional Knowledge Graph (LPKG) Advanced Graph Algorithms",
     });
 
     await store.createRelation(tenantId, {
+      tenantId,
       sourceEntityId: serviceA.id,
       targetEntityId: root.id,
       relationType: "integrates_with",

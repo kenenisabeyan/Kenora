@@ -161,6 +161,7 @@ export interface LPKGEntity {
   id: string;
   tenantId: string;
   name: string;
+  canonicalKey?: string;
   entityType: "technology" | "framework" | "pattern" | "organization" | "concept" | "standard";
   validityInterval: ValidityInterval;
   status: "active" | "superseded" | "deprecated";

@@ -171,8 +171,8 @@ export class InMemoryLPKGStore implements ILPKGStore {
     timeline.versions.push({
       version: nextVersionNum,
       timestamp: now,
-      supersededByEntityId: newEntityId,
-      reason,
+      supersededBy: newEntityId,
+      supersedingReason: reason,
       data: { ...updatedEntity },
     });
     this.timelines.set(existingEntityId, timeline);

@@ -100,7 +100,13 @@ export class DynamicTrustScorer implements IDynamicTrustScorer {
       totalEvals > 0 ? (record.verifiedClaimsCount / totalEvals) * 100 : record.baselineTrust;
 
     // Blended score: 70% empirical accuracy + 30% decayed baseline
-    const blended = 0.7 * empiricalAccuracy + 0.3 * (record.baselineTrust * decayFactor);
+    let blended = 0.7 * empiricalAccuracy + 0.3 * (record.baselineTrust * decayFactor);
+
+    // Explicit refutation penalty: ensure refuted claims strictly reduce score below decayed baseline
+    if (record.refutedClaimsCount > 0) {
+      const refutationPenalty = (record.refutedClaimsCount / totalEvals) * record.baselineTrust;
+      blended = Math.min(blended, record.baselineTrust * decayFactor - refutationPenalty);
+    }
 
     // Bounded in [0, 100]
     return Math.round(Math.min(100, Math.max(0, blended)) * 10) / 10;
