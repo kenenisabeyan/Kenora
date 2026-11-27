@@ -211,8 +211,11 @@ export interface KnowledgeEvolutionTimeline {
 
 export enum AuthorityTier {
   TIER_1_OFFICIAL = 1,     // Official specs, standards, RFCs, primary repo code & official docs
+  TIER_1_OFFICIAL_STANDARD = 1,
   TIER_2_MAINTAINERS = 2,  // Core maintainers, peer-reviewed benchmarks, major foundation advisories
+  TIER_2_VENDOR_DOCUMENTATION = 2,
   TIER_3_INDUSTRY = 3,     // Vetted industry engineering blogs, verified technical media
+  TIER_3_INDEPENDENT_RESEARCH = 3,
   TIER_4_COMMUNITY = 4,    // Community forums, social platforms, unverified individual posts
 }
 

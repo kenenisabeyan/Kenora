@@ -185,6 +185,35 @@ export class IntelligenceController {
     return this.intelligenceService.getEntityEvolutionTimeline(tenantId, id);
   }
 
+  @Get("graph/entity/:id/lineage")
+  @RequirePermission(Permissions.KNOWLEDGE_READ)
+  @ApiOperation({ summary: "Trace complete supersession lineage for an entity" })
+  async getEntityLineage(
+    @CurrentTenant() tenantId: string,
+    @Param("id") id: string,
+  ) {
+    return this.intelligenceService.getSupersessionLineage(tenantId, id);
+  }
+
+  @Get("graph/entity/:id/blast-radius")
+  @RequirePermission(Permissions.KNOWLEDGE_READ)
+  @ApiOperation({ summary: "Calculate blast radius (downstream dependencies/implementations impacted)" })
+  async calculateBlastRadius(
+    @CurrentTenant() tenantId: string,
+    @Param("id") id: string,
+    @Query("maxDepth") maxDepth?: string,
+  ) {
+    const depth = maxDepth ? parseInt(maxDepth, 10) : 3;
+    return this.intelligenceService.calculateBlastRadius(tenantId, id, depth);
+  }
+
+  @Get("graph/audit/cycles")
+  @RequirePermission(Permissions.KNOWLEDGE_READ)
+  @ApiOperation({ summary: "Audit LPKG supersession graph DAG invariant (detect cycles)" })
+  async auditGraphCycles(@CurrentTenant() tenantId: string) {
+    return this.intelligenceService.detectSupersessionCycles(tenantId);
+  }
+
   @Post("conflicts/adjudicate")
   @HttpCode(HttpStatus.OK)
   @RequirePermission(Permissions.KNOWLEDGE_READ)

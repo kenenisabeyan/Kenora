@@ -204,6 +204,34 @@ export class IntelligenceService {
   }
 
   /**
+   * LPKG Blast Radius and Downstream Impact Analysis
+   */
+  async calculateBlastRadius(
+    tenantId: string,
+    entityId: string,
+    maxDepth: number = 3,
+  ) {
+    return this.lpkgStore.calculateBlastRadius(tenantId, entityId, maxDepth);
+  }
+
+  /**
+   * LPKG Supersession Lineage Traversal
+   */
+  async getSupersessionLineage(
+    tenantId: string,
+    entityId: string,
+  ) {
+    return this.lpkgStore.getSupersessionLineage(tenantId, entityId);
+  }
+
+  /**
+   * LPKG Directed Acyclic Graph (DAG) Cycle Invariant Audit
+   */
+  async detectSupersessionCycles(tenantId: string) {
+    return this.lpkgStore.detectSupersessionCycles(tenantId);
+  }
+
+  /**
    * Multi-Source Verification Framework (MSVF) Conflict Adjudication
    */
   async adjudicateConflict(
