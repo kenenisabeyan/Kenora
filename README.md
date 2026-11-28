@@ -546,7 +546,7 @@ kenora/
 │   └── ui/                      # Shared atomic UI component library (Buttons, Cards, Badges)
 │
 ├── docs/                        # Architecture Decision Records (ADRs) & Security Specifications
-│   ├── adr/                     # ADR-0001 through ADR-0006
+│   ├── adr/                     # ADR-0001 through ADR-0010
 │   └── deployment/              # Dual-cloud deployment guides (Vercel + Render)
 ├── docker-compose.yml           # Local infrastructure stack (Postgres + pgvector, Redis, NATS, MinIO)
 ├── turbo.json                   # Turborepo pipeline orchestration
@@ -725,6 +725,10 @@ All architectural decisions are documented under [`docs/adr/`](file:///c:/Users/
 * [ADR-0004: Multi-Source Verification Framework (MSVF)](file:///c:/Users/kenenisa/Desktop/about%20kenenisa/My%20pojects/Kenora/docs/adr/ADR-0004-multi-source-verification-framework.md)
 * [ADR-0005: 28-Agent Cluster Fleet & Tri-Tier Memory](file:///c:/Users/kenenisa/Desktop/about%20kenenisa/My%20pojects/Kenora/docs/adr/ADR-0005-28-agent-cluster-mesh.md)
 * [ADR-0006: Cryptographic Audit Ledger & Secret Redaction](file:///c:/Users/kenenisa/Desktop/about%20kenenisa/My%20pojects/Kenora/docs/adr/ADR-0006-cryptographic-audit-ledger.md)
+* [ADR-0007: AI Safety, Prompt Injection Defense & Ingestion Quarantine](file:///c:/Users/kenenisa/Desktop/about%20kenenisa/My%20pojects/Kenora/docs/adr/ADR-0007-ai-safety-prompt-injection-defense.md)
+* [ADR-0008: Cryptographic Merkle Tree Inclusion Proofs for Audit Compliance](file:///c:/Users/kenenisa/Desktop/about%20kenenisa/My%20pojects/Kenora/docs/adr/ADR-0008-merkle-tree-inclusion-proofs.md)
+* [ADR-0009: High-Throughput Thread-Safe LRU Caching & SingleFlight Request Coalescing](file:///c:/Users/kenenisa/Desktop/about%20kenenisa/My%20pojects/Kenora/docs/adr/ADR-0009-lru-caching-and-single-flight-coalescing.md)
+* [ADR-0010: LPKG Blast Radius BFS Traversal & Directed Acyclic Graph (DAG) Invariant Enforcement](file:///c:/Users/kenenisa/Desktop/about%20kenenisa/My%20pojects/Kenora/docs/adr/ADR-0010-lpkg-blast-radius-and-dag-cycle-invariants.md)
 
 ---
 
