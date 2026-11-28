@@ -17,7 +17,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%20%2B%20pgvector-4169E1.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://github.com/pgvector/pgvector)
 [![Redis](https://img.shields.io/badge/Redis-7%20%2B%20BullMQ-DC382D.svg?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
 [![NATS](https://img.shields.io/badge/NATS-JetStream%20Mesh-27AAE1.svg?style=for-the-badge&logo=nats.io&logoColor=white)](https://nats.io/)
-[![Vitest](https://img.shields.io/badge/Vitest-115%2F115%20Tests%20Passed-6E9F18.svg?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Vitest](https://img.shields.io/badge/Vitest-119%2F119%20Tests%20Passed-6E9F18.svg?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Prometheus](https://img.shields.io/badge/Prometheus-OpenMetrics-E6522C.svg?style=for-the-badge&logo=prometheus&logoColor=white)](https://prometheus.io/)
 [![Dual-Cloud](https://img.shields.io/badge/Dual--Cloud-Vercel%20%2B%20Render-4F46E5.svg?style=for-the-badge&logo=vercel&logoColor=white)](#-dual-cloud-production-deployment-vercel--render)
 
@@ -25,7 +25,7 @@
 
 | Enterprise Availability SLA | Cryptographic Ledger Tip | Active Autonomous Mesh | Hybrid Search Latency (p95) | Test Verification Suite |
 | :---: | :---: | :---: | :---: | :---: |
-| **99.99% Target · 100% Rolling** | **SHA-256 Merkle Chained** | **28 / 28 Agents Online** | **< 20ms (RRF k=60)** | **33 Suites · 115 / 115 Passed** |
+| **99.99% Target · 100% Rolling** | **SHA-256 Merkle Chained** | **28 / 28 Agents Online** | **< 20ms (RRF k=60)** | **34 Suites · 119 / 119 Passed** |
 
 <br/>
 
